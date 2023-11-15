@@ -1,11 +1,12 @@
 /****
  * The main js file. In this file, we should implement:
- *  - Set up render, sence and camera
+ *  - Set up render, scene and camera
  *  - Start render loop and handle windows size
  *  - Handle the controller signal from keyboard or click
  ****/
 import * as THREE from 'three';
-import { StartScene } from './sences';
+import { StartScene } from './scenes';
+import { EndScene } from './scenes';
 import WebGL from 'three/addons/capabilities/WebGL.js';
 
 const scene = new StartScene();
