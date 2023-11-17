@@ -6,10 +6,11 @@
  ****/
 import * as THREE from 'three';
 import { StartScene } from './scenes';
-import { EndScene } from './scenes';
 import WebGL from 'three/addons/capabilities/WebGL.js';
+import { build_new_scene, change_global_info, check_page_change, get_page_info, get_pause_state, Lock, set_page_info, set_pause_state } from './utils';
 
-const scene = new StartScene();
+var scene = new StartScene();
+
 const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
 
 const renderer = new THREE.WebGLRenderer();
@@ -18,24 +19,52 @@ document.body.appendChild( renderer.domElement );
 
 camera.position.z = 5;
 
-function animate() {
-	requestAnimationFrame( animate );
+const ReadInfoLock = new Lock();
+const WriteInfoLock = new Lock();
 
-	scene.cube.rotation.x += 0.01;
-	scene.cube.rotation.y += 0.01;
-
-	if (scene.add_mesh_flag) {
-		// scene.text_mesh.rotation.x += 0.01;
-		// scene.text_mesh.rotation.y += 0.01;
+// Render loop
+const onAnimationFrameHandler = (timeStamp) => {
+	WriteInfoLock.acquire();
+	if (get_page_info() == 'play') {
+		scene.update_time_stamp(timeStamp, !get_pause_state());
 	}
-
+	if (!get_pause_state() || get_page_info() != 'play') {
+		scene.update();
+	}
+	if (get_page_info() == 'play') {
+		if (scene.is_terminal()) {
+			set_page_info('end');
+			set_pause_state(false);
+			scene = build_new_scene();
+		}
+	}
 	renderer.render( scene, camera );
+	WriteInfoLock.release();
+
+	window.requestAnimationFrame(onAnimationFrameHandler);
 }
 
-if ( WebGL.isWebGLAvailable() ) {
-    animate();
-}
-else {
-	const warning = WebGL.getWebGLErrorMessage();
-	document.getElementById( 'container' ).appendChild( warning );
-}
+window.requestAnimationFrame(onAnimationFrameHandler);
+
+// Resize Handler
+const windowResizeHandler = () => {
+    const { innerHeight, innerWidth } = window;
+    renderer.setSize(innerWidth, innerHeight);
+    camera.aspect = innerWidth / innerHeight;
+    camera.updateProjectionMatrix();
+};
+windowResizeHandler();
+window.addEventListener('resize', windowResizeHandler, false);
+
+window.addEventListener('keydown', event => {
+    const key = event.key;
+    ReadInfoLock.acquire();
+	if (check_page_change(key)) {
+		WriteInfoLock.acquire();
+		if (change_global_info(key)) {
+			scene = build_new_scene();
+		}
+		WriteInfoLock.release();
+	}
+	ReadInfoLock.release();
+})

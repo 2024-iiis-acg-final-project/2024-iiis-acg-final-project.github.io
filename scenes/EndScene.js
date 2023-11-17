@@ -12,8 +12,6 @@ class EndScene extends THREE.Scene {
         this.cube = cube
         this.add( this.cube );
 
-        this.add_mesh_flag = false;
-
         let text_mesh;
 
         var loader = new FontLoader();
@@ -40,7 +38,6 @@ class EndScene extends THREE.Scene {
 
             this.text_mesh = text_mesh;
             this.add(this.text_mesh);
-            this.add_mesh_flag = true;
         }.bind(this) );
 
         this.add( new THREE.AmbientLight( 0x777777 ) );
@@ -48,6 +45,11 @@ class EndScene extends THREE.Scene {
         directionalLight.position.set(100, 100, 100);
         this.add( directionalLight );
         
+    }
+
+    update() {
+        this.cube.rotation.x += 0.01;
+        this.cube.rotation.y += 0.01;
     }
 }
 
