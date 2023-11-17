@@ -48,17 +48,17 @@ window.requestAnimationFrame(onAnimationFrameHandler);
 
 // Resize Handler
 const windowResizeHandler = () => {
-    const { innerHeight, innerWidth } = window;
-    renderer.setSize(innerWidth, innerHeight);
-    camera.aspect = innerWidth / innerHeight;
-    camera.updateProjectionMatrix();
+	const { innerHeight, innerWidth } = window;
+	renderer.setSize(innerWidth, innerHeight);
+	camera.aspect = innerWidth / innerHeight;
+	camera.updateProjectionMatrix();
 };
 windowResizeHandler();
 window.addEventListener('resize', windowResizeHandler, false);
 
 window.addEventListener('keydown', event => {
-    const key = event.key;
-    ReadInfoLock.acquire();
+	const key = event.key;
+	ReadInfoLock.acquire();
 	if (check_page_change(key)) {
 		WriteInfoLock.acquire();
 		if (change_global_info(key)) {
