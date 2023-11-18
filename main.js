@@ -25,14 +25,13 @@ const WriteInfoLock = new Lock();
 // Render loop
 const onAnimationFrameHandler = (timeStamp) => {
 	WriteInfoLock.acquire();
-	if (get_page_info() == 'play') {
-		scene.update_time_stamp(timeStamp, !get_pause_state());
-	}
 	if (!get_pause_state() || get_page_info() != 'play') {
 		scene.update();
 	}
 	if (get_page_info() == 'play') {
+		scene.set_camera(camera);
 		if (scene.is_terminal()) {
+			scene.reset_camera(camera);
 			set_page_info('end');
 			set_pause_state(false);
 			scene = build_new_scene();
@@ -61,10 +60,27 @@ window.addEventListener('keydown', event => {
 	ReadInfoLock.acquire();
 	if (check_page_change(key)) {
 		WriteInfoLock.acquire();
+		const before_page_info = get_page_info();
 		if (change_global_info(key)) {
+			if (before_page_info == 'play') {
+				scene.reset_camera(camera);
+			}
 			scene = build_new_scene();
 		}
 		WriteInfoLock.release();
 	}
+	else {
+		if (get_page_info() == 'play') {
+			scene.update_by_press_key(key);
+		}
+	}
 	ReadInfoLock.release();
+	
+})
+
+window.addEventListener('keyup', event => {
+	const key = event.key;
+	if (get_page_info() == 'play') {
+		scene.update_by_release_key(key);
+	}
 })
