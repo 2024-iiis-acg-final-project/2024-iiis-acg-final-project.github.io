@@ -1,6 +1,8 @@
 import {AmbientLight, DirectionalLight, PointLight, Scene} from 'three';
 import { load_ground } from '../objects/grounds';
 import { load_launch_pad } from '../objects/launchPad';
+import { load_enemy } from '../objects/enemy';
+import { load_shell } from '../objects/shell';
 
 class PlayScene extends Scene {
     constructor(level) {
@@ -11,6 +13,21 @@ class PlayScene extends Scene {
             .then(levelConfigs => {
                 load_ground(levelConfigs["gound_name"], this);
                 load_launch_pad(levelConfigs['launch_pad'], this);
+
+                this.pad_x = levelConfigs['launch_pad']['x'];
+                this.pad_y = levelConfigs['launch_pad']['y'];
+                this.pad_z = levelConfigs['launch_pad']['z'];
+
+                var enemy_id = 0;
+                for (let enemy_cfg of levelConfigs['enemy']) {
+                    load_enemy(this, enemy_cfg, enemy_id);
+                    enemy_id += 1;
+                }
+                var shell_id = 0;
+                for (let shell_type of levelConfigs['shell']) {
+                    load_shell(this, shell_type, shell_id);
+                    shell_id += 1;
+                }
             })
             .then(error => {
                 console.error('Error:', error)
@@ -44,7 +61,14 @@ class PlayScene extends Scene {
     }
 
     update() {
+        var wait_shell_x = this.pad_x + 0.2;
         for (let object of this.update_list) {
+            if (object.obj_type == 'shell') {
+                if(object.shell_state == 'wait') {
+                    wait_shell_x += 0.3;
+                    object.set_position(wait_shell_x, this.pad_y, this.pad_z);
+                }
+            }
             object.update()
         }
     }
@@ -66,7 +90,7 @@ class PlayScene extends Scene {
     update_by_press_key(key) {
         if (key == 'ArrowLeft' || key == 'ArrowRight' || 
             key == 'ArrowUp' || key == 'ArrowDown' ||
-            key == 'Enter') {
+            key == 'Enter' || key == ' ') {
             for (let object of this.update_list) {
                 if (object.name == 'launch_pad') {
                     object.update_by_press_key(key);
@@ -78,7 +102,7 @@ class PlayScene extends Scene {
     update_by_release_key(key) {
         if (key == 'ArrowLeft' || key == 'ArrowRight' || 
             key == 'ArrowUp' || key == 'ArrowDown' ||
-            key == 'Enter') {
+            key == 'Enter' || key == ' ') {
             for (let object of this.update_list) {
                 if (object.name == 'launch_pad') {
                     object.update_by_release_key(key);

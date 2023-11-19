@@ -1,5 +1,4 @@
 import { Group, PlaneGeometry, Mesh, MeshPhongMaterial, MeshStandardMaterial, BoxGeometry } from "three";
-// import { Group } from "three";
 
 class PlaneGround extends Group {
     constructor(parent){

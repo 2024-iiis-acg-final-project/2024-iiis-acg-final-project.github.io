@@ -5,7 +5,7 @@ function check_page_change(key) {
     if (page_info == 'start' && key == ' ') {
         return true;
     }
-    if (page_info == 'select' && !isNaN(key)) {
+    if (page_info == 'select' && !isNaN(key) && key != ' ') {
         return true;
     }
     if (page_info == 'play' && get_pause_state() == false && key == 'e') {
@@ -35,7 +35,7 @@ function change_global_info(key) {
         set_page_info('select');
         return true;
     }
-    if (page_info == 'select' && !isNaN(key)) {
+    if (page_info == 'select' && !isNaN(key) && key != ' ') {
         set_page_info('play');
         set_pause_state(false);
         set_level(parseInt(key, 10));

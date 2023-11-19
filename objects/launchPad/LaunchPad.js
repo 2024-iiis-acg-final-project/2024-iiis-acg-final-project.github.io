@@ -1,5 +1,4 @@
-import { BufferAttribute, BufferGeometry, Group, Mesh, MeshPhongMaterial, MeshStandardMaterial, MeshNormalMaterial } from "three";
-import * as THREE from "three";
+import { BufferAttribute, BufferGeometry, Group, Mesh, PlaneGeometry, MeshStandardMaterial, MeshBasicMaterial } from "three";
 
 class LaunchPad extends Group {
     constructor(parent, x, y, z) {
@@ -68,6 +67,13 @@ class LaunchPad extends Group {
 
         this.launch_pad.position.set(x, y, z);
 
+        this.force_render = new Mesh(new PlaneGeometry(0.1, 0.05 * 0.6, 1, 1), 
+                                     new MeshBasicMaterial({color: this.linear_color(0.05)}));
+        this.force_render.position.set(x - 0.5, y + this.force * 0.6 / 2, z);
+        this.pad_x = x;
+        this.pad_y = y;
+        this.pad_z = z;
+
         this.parent.addToUpdateList(this);
 
         this.max_y = Math.PI / 4;
@@ -81,13 +87,20 @@ class LaunchPad extends Group {
         this.up_move = false;
         this.down_move = false;
                 
-        this.force = 0;
-        this.max_force = 100;
+        this.force = 0.05;
+        this.max_force = 1;
         this.last_in_press = false;
         this.in_press = false;
 
         this.attacking = false;
 
+        this.parent.add(this.launch_pad);
+    }
+
+    linear_color(rate) {
+        const red = Math.round((0xff) * Math.min(rate * 2, 1)) * (0x10000);
+        const green = Math.round((0xff) * Math.min((1 - rate) * 2, 1)) * (0x100);
+        return red + green;
     }
 
     update_launch_info() {
@@ -117,11 +130,20 @@ class LaunchPad extends Group {
         }
         if (this.in_press) {
             if (this.last_in_press == false) {
-                this.force = 0;
+                this.force = 0.05;
                 this.last_in_press = true;
+                this.force_render = new Mesh(new PlaneGeometry(0.1, 0.05 * 0.6, 1, 1), 
+                                             new MeshBasicMaterial({color: this.linear_color(0.05)}));
+                this.force_render.position.set(this.pad_x - 0.5, this.pad_y + this.force * 0.6 / 2, this.pad_z);
             }
             else {
                 this.force += this.step;
+                if (this.force > this.max_force) {
+                    this.force = this.max_force;
+                }
+                this.force_render = new Mesh(new PlaneGeometry(0.1, this.force * 0.6, 1, 1), 
+                                             new MeshBasicMaterial({color: this.linear_color(this.force)}));
+                this.force_render.position.set(this.pad_x - 0.5, this.pad_y + this.force * 0.6 / 2, this.pad_z);
             }
         }
         else {
@@ -130,11 +152,11 @@ class LaunchPad extends Group {
     }
 
     update() {
-        this.parent.remove(this.launch_pad);
+        this.parent.remove(this.force_render);
         if (!this.attacking) {
             this.update_launch_info();
         }
-        this.parent.add(this.launch_pad);
+        this.parent.add(this.force_render);
     }
 
     update_by_press_key(key) {
