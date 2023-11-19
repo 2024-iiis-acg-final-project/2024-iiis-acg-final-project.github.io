@@ -12,12 +12,12 @@ class EndScene extends THREE.Scene {
         this.cube = cube
         this.add( this.cube );
 
-        let text_mesh;
+        let title_mesh;
 
         var loader = new FontLoader();
 
         loader.load( './style/font.json', function ( font ) {
-            const text_geometry = new TextGeometry( 'Game Over!', {
+            const title_geometry = new TextGeometry( 'Game Over!', {
                 font: font,
                 size: 70,
                 height: 20,
@@ -27,17 +27,17 @@ class EndScene extends THREE.Scene {
                 bevelSize: 1.5
             } );
 
-            text_geometry.computeBoundingBox();
-            const centerOffset = - 0.5 * ( text_geometry.boundingBox.max.x - text_geometry.boundingBox.min.x );
+            title_geometry.computeBoundingBox();
+            const centerOffset = - 0.5 * ( title_geometry.boundingBox.max.x - title_geometry.boundingBox.min.x );
 
-            const text_material = new THREE.MeshStandardMaterial( { color: 0xffffff } );
-            text_mesh = new THREE.Mesh(text_geometry, text_material);
+            const title_material = new THREE.MeshStandardMaterial( { color: 0xffffff } );
+            title_mesh = new THREE.Mesh(title_geometry, title_material);
             
-            text_mesh.position.set(centerOffset, -30, -500);
-            text_mesh.rotation.set(0, Math.PI * 2, 0);
+            title_mesh.position.set(centerOffset, -30, -500);
+            title_mesh.rotation.set(0, Math.PI * 2, 0);
 
-            this.text_mesh = text_mesh;
-            this.add(this.text_mesh);
+            this.title_mesh = title_mesh;
+            this.add(this.title_mesh);
         }.bind(this) );
 
         this.add( new THREE.AmbientLight( 0x777777 ) );
