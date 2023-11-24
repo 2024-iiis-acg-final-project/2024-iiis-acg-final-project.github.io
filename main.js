@@ -71,7 +71,14 @@ window.addEventListener('keydown', event => {
 	}
 	else {
 		if (get_page_info() == 'play') {
-			scene.update_by_press_key(key);
+			if (key == 'Enter') {
+				WriteInfoLock.acquire();
+				scene.update_by_press_key(key);
+				WriteInfoLock.release();
+			}
+			else{
+				scene.update_by_press_key(key);
+			}
 		}
 	}
 	ReadInfoLock.release();

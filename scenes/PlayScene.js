@@ -62,14 +62,60 @@ class PlayScene extends Scene {
 
     update() {
         var wait_shell_x = this.pad_x + 0.2;
+        var attacking_flag = false;
         for (let object of this.update_list) {
             if (object.obj_type == 'shell') {
-                if(object.shell_state == 'wait') {
+                if (object.shell_state == 'attacking') {
+                    attacking_flag = true;
+                }
+            }
+        }
+        if (attacking_flag == false) {
+            for (let object of this.update_list) {
+                if (object.obj_type == 'launch_pad') {
+                    object.attacking = false;
+                }
+            }
+        }
+        for (let object of this.update_list) {
+            if (object.obj_type == 'shell') {
+                if (object.shell_state == 'wait') {
                     wait_shell_x += 0.3;
                     object.set_position(wait_shell_x, this.pad_y, this.pad_z);
                 }
             }
             object.update()
+        }
+    }
+
+    set_first_shell_attack(force, x_angle, y_angle, length) {
+        var unit_length = {
+            x: 0,
+            y: 0,
+            z: -1
+        }
+        var t1 = unit_length.y, t2 = unit_length.z;
+        unit_length.y = t1 * Math.cos(x_angle) - t2 * Math.sin(x_angle);
+        unit_length.z = t1 * Math.sin(x_angle) + t2 * Math.cos(x_angle);
+        t1 = unit_length.z; t2 = unit_length.x;
+        unit_length.z = t1 * Math.cos(y_angle) - t2 * Math.sin(y_angle);
+        unit_length.x = t1 * Math.sin(y_angle) + t2 * Math.cos(y_angle);
+        
+        for (let object of this.update_list) {
+            if (object.obj_type == 'shell') {
+                if (object.shell_state == 'wait') {
+                    object.shell_state = 'attacking';
+                    object.velocity = {
+                        x: unit_length.x * force * 0.1,
+                        y: unit_length.y * force * 0.1,
+                        z: unit_length.z * force * 0.1
+                    }
+                    object.set_position(this.pad_x + unit_length.x * length,
+                                        this.pad_y + unit_length.y * length,
+                                        this.pad_z + unit_length.z * length);
+                    break;
+                }
+            }
         }
     }
 

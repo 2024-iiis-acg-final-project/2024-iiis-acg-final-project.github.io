@@ -93,6 +93,7 @@ class LaunchPad extends Group {
         this.in_press = false;
 
         this.attacking = false;
+        this.no_collision = true;
 
         this.parent.add(this.launch_pad);
     }
@@ -184,6 +185,7 @@ class LaunchPad extends Group {
                 this.in_press = false;
                 this.last_in_press = false;
                 this.attacking = true;
+                this.parent.set_first_shell_attack(this.force, this.launch_pad.rotation.x, this.launch_pad.rotation.y, 1);
                 // Doing attacking animation
             }
         }
