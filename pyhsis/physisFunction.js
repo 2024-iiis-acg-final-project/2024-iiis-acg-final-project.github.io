@@ -1,21 +1,20 @@
 function SphereWithSphere(position1, velocity1, angle_velocity1, radius1, mass1,
                           position2, velocity2, angle_velocity2, radius2, mass2) {
-    var discount_coef = 0.75;
+    var discount_coef = 0.9;
     var center_velocity = {
         x: (velocity1.x * mass1 + velocity2.x * mass2) / (mass1 + mass2),
         y: (velocity1.y * mass1 + velocity2.y * mass2) / (mass1 + mass2),
         z: (velocity1.z * mass1 + velocity2.z * mass2) / (mass1 + mass2)
     };
-    var discount_coef = 0.75;
     var new_this_velocity = {
-        x: velocity1.x - (velocity1.x - center_velocity.x) * (1 + discount_coef),
-        y: velocity1.y - (velocity1.y - center_velocity.y) * (1 + discount_coef),
-        z: velocity1.z - (velocity1.z - center_velocity.z) * (1 + discount_coef)
+        x: (velocity1.x - (velocity1.x - center_velocity.x) * 2) * discount_coef,
+        y: (velocity1.y - (velocity1.y - center_velocity.y) * 2) * discount_coef,
+        z: (velocity1.z - (velocity1.z - center_velocity.z) * 2) * discount_coef
     };
     var new_object_velocity = {
-        x: velocity2.x - (velocity2.x - center_velocity.x) * (1 + discount_coef),
-        y: velocity2.y - (velocity2.y - center_velocity.y) * (1 + discount_coef),
-        z: velocity2.z - (velocity2.z - center_velocity.z) * (1 + discount_coef)
+        x: (velocity2.x - (velocity2.x - center_velocity.x) * 2) * discount_coef,
+        y: (velocity2.y - (velocity2.y - center_velocity.y) * 2) * discount_coef,
+        z: (velocity2.z - (velocity2.z - center_velocity.z) * 2) * discount_coef
     };
     var relative_velocity = {
         x: velocity1.x - velocity2.x,
@@ -66,14 +65,14 @@ function SphereWithSphere(position1, velocity1, angle_velocity1, radius1, mass1,
         z: r2.x * relative_velocity.y - r2.y * relative_velocity.x
     };
     var ret_angle_velocity1 = {
-        x: angle_velocity1.x + (mass2 * (r1v.x * sin_theta / radius1 + w1r1.x + w2r2.x)) / ((mass1 + mass2) * radius1),
-        y: angle_velocity1.y + (mass2 * (r1v.y * sin_theta / radius1 + w1r1.y + w2r2.y)) / ((mass1 + mass2) * radius1),
-        z: angle_velocity1.z + (mass2 * (r1v.z * sin_theta / radius1 + w1r1.z + w2r2.z)) / ((mass1 + mass2) * radius1)
+        x: (angle_velocity1.x + (mass2 * (r1v.x * sin_theta / radius1 + w1r1.x + w2r2.x)) / ((mass1 + mass2) * radius1)) * discount_coef,
+        y: (angle_velocity1.y + (mass2 * (r1v.y * sin_theta / radius1 + w1r1.y + w2r2.y)) / ((mass1 + mass2) * radius1)) * discount_coef,
+        z: (angle_velocity1.z + (mass2 * (r1v.z * sin_theta / radius1 + w1r1.z + w2r2.z)) / ((mass1 + mass2) * radius1)) * discount_coef
     }
     var ret_angle_velocity2 = {
-        x: angle_velocity2.x + (mass1 * (r2v.x * sin_theta / radius2 + w1r1.x + w2r2.x)) / ((mass1 + mass2) * radius2),
-        y: angle_velocity2.y + (mass1 * (r2v.y * sin_theta / radius2 + w1r1.y + w2r2.y)) / ((mass1 + mass2) * radius2),
-        z: angle_velocity2.z + (mass1 * (r2v.z * sin_theta / radius2 + w1r1.z + w2r2.z)) / ((mass1 + mass2) * radius2)
+        x: (angle_velocity2.x + (mass1 * (r2v.x * sin_theta / radius2 + w1r1.x + w2r2.x)) / ((mass1 + mass2) * radius2)) * discount_coef,
+        y: (angle_velocity2.y + (mass1 * (r2v.y * sin_theta / radius2 + w1r1.y + w2r2.y)) / ((mass1 + mass2) * radius2)) * discount_coef,
+        z: (angle_velocity2.z + (mass1 * (r2v.z * sin_theta / radius2 + w1r1.z + w2r2.z)) / ((mass1 + mass2) * radius2)) * discount_coef
     }
 
     return {
@@ -85,15 +84,16 @@ function SphereWithSphere(position1, velocity1, angle_velocity1, radius1, mass1,
 }
 
 function SphereWithPlane(velocity, angle_velocity, radius, normal) {
+    var discount_coef = 0.9;
     var test_dir = velocity.x * normal.x + velocity.y * normal.y + velocity.z * normal.z;
     if (test_dir > 0) {
         normal.x = - normal.x; normal.y = - normal.y; normal.z = - normal.z;
     }
     test_dir = - test_dir;
     var ret_velocity = {
-        x: velocity.x + 2 * normal.x * test_dir,
-        y: velocity.y + 2 * normal.y * test_dir,
-        z: velocity.z + 2 * normal.z * test_dir
+        x: (velocity.x + 2 * normal.x * test_dir) * discount_coef,
+        y: (velocity.y + 2 * normal.y * test_dir) * discount_coef,
+        z: (velocity.z + 2 * normal.z * test_dir) * discount_coef
     };
     var v_norm = Math.sqrt(velocity.x * velocity.x + velocity.y * velocity.y + velocity.z * velocity.z);
     var sin_theta = test_dir / v_norm;
@@ -113,9 +113,9 @@ function SphereWithPlane(velocity, angle_velocity, radius, normal) {
         z: r1.x * velocity.y - r1.y * velocity.x
     };
     var ret_angle_velocity = {
-        x: angle_velocity.x + (sin_theta * rv.x / radius + w1r1.x) / radius,
-        y: angle_velocity.y + (sin_theta * rv.y / radius + w1r1.y) / radius,
-        z: angle_velocity.z + (sin_theta * rv.z / radius + w1r1.z) / radius
+        x: (angle_velocity.x + (sin_theta * rv.x / radius + w1r1.x) / radius) * discount_coef,
+        y: (angle_velocity.y + (sin_theta * rv.y / radius + w1r1.y) / radius) * discount_coef,
+        z: (angle_velocity.z + (sin_theta * rv.z / radius + w1r1.z) / radius) * discount_coef
     };
     return {
         new_velocity: ret_velocity,
@@ -123,4 +123,14 @@ function SphereWithPlane(velocity, angle_velocity, radius, normal) {
     }
 }
 
-export {SphereWithSphere, SphereWithPlane};
+function damage(energy) {
+    if (energy * 2000 < 1) {
+        return 0;
+    }
+    else {
+        // window.alert(String(energy) + " " + String(energy * 2000) + " " + String(Math.exp(Math.min(5, energy * 500))));
+        return energy * 2000;
+    }
+}
+
+export {SphereWithSphere, SphereWithPlane, damage};

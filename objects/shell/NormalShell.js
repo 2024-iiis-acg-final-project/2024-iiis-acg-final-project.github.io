@@ -1,5 +1,5 @@
 import {Group, Mesh, SphereGeometry, MeshStandardMaterial} from 'three';
-import {SphereWithPlane, SphereWithSphere} from '../../pyhsis'
+import {SphereWithPlane, SphereWithSphere, damage} from '../../pyhsis'
 
 class NormalShell extends Group {
     constructor(parent, id) {
@@ -25,7 +25,7 @@ class NormalShell extends Group {
         this.radius = 0.1
         this.small_velocity_period = 0
 
-        this.mass = 1;
+        this.mass = 50;
 
         this.shell_state = "wait"; // state should in ["wait", "attacking", "used"]
 
@@ -52,6 +52,11 @@ class NormalShell extends Group {
         this.shell.rotation.x += this.angle_velocity.x * t;
         this.shell.rotation.y += this.angle_velocity.y * t;
         this.shell.rotation.z += this.angle_velocity.z * t;
+        if (this.shell.position.x < -100 || this.shell.position.x > 100 ||
+            this.shell.position.y < -100 || this.shell.position.y > 100 ||
+            this.shell.position.z < -100 || this.shell.position.z > 100) {
+                this.shell_state = 'used';
+        }
     }
 
     move_step() {
@@ -69,6 +74,7 @@ class NormalShell extends Group {
             var min_object = null;
             var index = 0, min_index = -1;
             for (let object of this.parent.update_list) {
+                index += 1;
                 if (object.obj_type == 'shell') {
                     if (object.shell_id == this.shell_id) {
                         continue;
@@ -84,9 +90,8 @@ class NormalShell extends Group {
                 if (this_t < min_t) {
                     min_t = this_t;
                     min_object = object;
-                    min_index = index;
+                    min_index = index - 1;
                 }
-                index += 1;
             }
             if (min_object == null) {
                 break;
@@ -99,20 +104,27 @@ class NormalShell extends Group {
                     var ret = SphereWithSphere(this.get_position(), this.velocity, this.angle_velocity, this.radius, this.mass,
                                                min_object.get_position(), min_object.velocity, min_object.angle_velocity, 
                                                min_object.radius, min_object.mass);
+                    
+                    if (min_object.obj_type == 'enemy') {
+                        var relative_velocity = {
+                            x: this.velocity.x - min_object.velocity.x,
+                            y: this.velocity.y - min_object.velocity.y,
+                            z: this.velocity.z - min_object.velocity.z
+                        }
+                        var energy = 0.5 * this.mass * (relative_velocity.x * relative_velocity.x + 
+                                                        relative_velocity.y * relative_velocity.y +
+                                                        relative_velocity.z * relative_velocity.z);
+                        this.parent.update_list[min_index].blood -= damage(energy);
+                        if (this.parent.update_list[min_index].blood <= 0){
+                            this.parent.remove(this.parent.update_list[min_index]);
+                        }
+                    }
+
                     this.velocity = ret.new_velocity1;
                     this.angle_velocity = ret.new_angle_velocity1;
                     if (min_object.is_fix() == false) {
                         this.parent.update_list[min_index].velocity = ret.new_velocity2;
                         this.parent.update_list[min_index].angle_velocity = ret.new_angle_velocity2;
-                    }
-                    if (min_object.obj_type == 'enemy') {
-                        var energy = 0.5 * this.mass * (this.velocity.x * this.velocity.x + 
-                                                        this.velocity.y * this.velocity.y +
-                                                        this.velocity.z * this.velocity.z);
-                        this.parent.update_list[min_index].blood -= 500 * energy;
-                        if (this.parent.update_list[min_index].blood < 0){
-                            this.parent.remove(this.parent.update_list[min_index]);
-                        }
                     }
                 }
                 else if (min_object.geo == 'plane') {
@@ -126,6 +138,22 @@ class NormalShell extends Group {
             }
         }
         this.move_time(remain_step);
+
+        for (let object of this.parent.update_list) {
+            if (object.obj_type == 'shell') {
+                if (object.shell_id == this.shell_id) {
+                    continue;
+                }
+            }
+            if (object.no_collision == true) {
+                continue;
+            }
+            if (object.is_intersect(this.shell.position, this.radius)) {
+                if (object.geo == 'sphere') {
+                    this.apply_anti_force_from_position(object.get_position());
+                }
+            }
+        }
     }
 
     get_position() {
@@ -139,15 +167,42 @@ class NormalShell extends Group {
         return true;
     }
 
+    is_intersect(position, radius) {
+        var c = (this.shell.position.x - position.x) * (this.shell.position.x - position.x) +
+                (this.shell.position.y - position.y) * (this.shell.position.y - position.y) +
+                (this.shell.position.z - position.z) * (this.shell.position.z - position.z) -
+                (this.radius + radius) * (this.radius + radius);
+        if (c < 0) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
+    apply_anti_force_from_position(position) {
+        var force_vector = {
+            x: this.shell.position.x - position.x,
+            y: this.shell.position.y - position.y,
+            z: this.shell.position.z - position.z
+        }
+        var f_norm = Math.sqrt(force_vector.x * force_vector.x + force_vector.y * force_vector.y + force_vector.z * force_vector.z);
+        force_vector.x /= f_norm; force_vector.y /= f_norm; force_vector.z /= f_norm;
+        this.velocity.x += force_vector.x * 0.001 / f_norm;
+        this.velocity.y += force_vector.y * 0.001 / f_norm;
+        this.velocity.z += force_vector.z * 0.001 / f_norm;
+    }
+
+
     cal_min_t(position, velocity, radius) {
         // Line equation: position + t * velocity
         var a = velocity.x * velocity.x + velocity.y * velocity.y + velocity.z * velocity.z;
-        var b = 2 * (velocity.x * (this.shell.x - position.x) + 
-                     velocity.y * (this.shell.y - position.y) + 
-                     velocity.z * (this.shell.z - position.z))
-        var c = (this.shell.x - position.x) * (this.shell.x - position.x) +
-                (this.shell.y - position.y) * (this.shell.y - position.y) +
-                (this.shell.z - position.z) * (this.shell.z - position.z) -
+        var b = 2 * (velocity.x * (this.shell.position.x - position.x) + 
+                     velocity.y * (this.shell.position.y - position.y) + 
+                     velocity.z * (this.shell.position.z - position.z))
+        var c = (this.shell.position.x - position.x) * (this.shell.position.x - position.x) +
+                (this.shell.position.y - position.y) * (this.shell.position.y - position.y) +
+                (this.shell.position.z - position.z) * (this.shell.position.z - position.z) -
                 (this.radius + radius) * (this.radius + radius);
         var delta = b * b - 4 * a * c;
         if (delta < 0) {
@@ -167,10 +222,10 @@ class NormalShell extends Group {
         if (x1 > x2) {
             var t = x1; x1 = x2; x2 = t;
         }
-        if (x2 < 1e-4) {
+        if (x2 < 0.1) {
             return 2;
         }
-        if (x1 < 0) {
+        if (x1 < -0.1) {
             return x2;
         }
         return x1;
@@ -186,9 +241,7 @@ class NormalShell extends Group {
     }
 
     update(){
-        if (this.shell_state != 'used') {
-            this.parent.remove(this.shell);
-        }
+        this.parent.remove(this.shell);
 
         if (this.shell_state == 'attacking') {
             this.move_step();
@@ -198,6 +251,9 @@ class NormalShell extends Group {
 
         if (this.shell_state != 'used') {
             this.parent.add(this.shell);
+        }
+        else {
+            this.no_collision = true;
         }
     }
 }
