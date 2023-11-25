@@ -83,8 +83,13 @@ function SphereWithSphere(position1, velocity1, angle_velocity1, radius1, mass1,
     }
 }
 
-function SphereWithPlane(velocity, angle_velocity, radius, normal) {
+function SphereWithPlane(velocity, angle_velocity, radius, norm) {
     var discount_coef = 0.9;
+    var normal = {
+        x: norm.x,
+        y: norm.y,
+        z: norm.z
+    }
     var test_dir = velocity.x * normal.x + velocity.y * normal.y + velocity.z * normal.z;
     if (test_dir > 0) {
         normal.x = - normal.x; normal.y = - normal.y; normal.z = - normal.z;

@@ -18,7 +18,7 @@ class PlaneGround extends Group {
             y: 1,
             z: 0
         };
-        var norm_coef = this.normal.x * this.normal.x + this.normal.y * this.normal.y + this.normal.z * this.normal.z;
+        var norm_coef = Math.sqrt(this.normal.x * this.normal.x + this.normal.y * this.normal.y + this.normal.z * this.normal.z);
         this.normal.x /= norm_coef; this.normal.y /= norm_coef; this.normal.z /= norm_coef;
         this.ground_coef = -0.5;
 
@@ -30,7 +30,15 @@ class PlaneGround extends Group {
     }
 
     is_intersect(position, radius) {
-        // TODO!!!
+        // if (position.y < -0.4) {
+        //     window.alert("???????:" + String(Math.abs(position.x * this.normal.x + position.y * this.normal.y + position.z * this.normal.z - this.ground_coef)) + " " 
+        //                             + String(radius) + " "
+        //                             + String(position.x) + " " + String(position.y) + " " + String(position.z) + " "
+        //                             + String(this.normal.x) + " " + String(this.normal.y) + " " + String(this.normal.z));
+        // }
+        if (Math.abs(position.x * this.normal.x + position.y * this.normal.y + position.z * this.normal.z - this.ground_coef) <= radius) {
+            return true;
+        }
         return false;
     }
 
@@ -47,10 +55,10 @@ class PlaneGround extends Group {
         if (x1 > x2) {
             var t = x1; x1 = x2; x2 = t;
         }
-        if (x2 < 0.1) {
+        if (x2 < 1e-4) {
             return 2;
         }
-        if (x1 < -0.1) {
+        if (x1 < -1e-4) {
             return x2;
         }
         return x1;

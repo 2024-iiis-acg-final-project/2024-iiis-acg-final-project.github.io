@@ -3,6 +3,7 @@ import { load_ground } from '../objects/grounds';
 import { load_launch_pad } from '../objects/launchPad';
 import { load_enemy } from '../objects/enemy';
 import { load_shell } from '../objects/shell';
+import { load_wall } from '../objects/wall';
 
 class PlayScene extends Scene {
     constructor(level) {
@@ -27,6 +28,11 @@ class PlayScene extends Scene {
                 for (let shell_type of levelConfigs['shell']) {
                     load_shell(this, shell_type, shell_id);
                     shell_id += 1;
+                }
+                var wall_id = 0;
+                for (let wall_cfg of levelConfigs['wall']) {
+                    load_wall(this, wall_cfg['id'], wall_id, wall_cfg['cfg']);
+                    wall_id += 1;
                 }
             })
             .then(error => {

@@ -74,6 +74,9 @@ class NormalEnemy extends Group{
     }
 
     move_step() {
+        if (this.blood <= 0) {
+            return;
+        }
         var remain_step = 1.0;
         for (let i = 0; i < 4; i++) {
             // In one step, collision happen up to 4 times for one object
@@ -112,10 +115,7 @@ class NormalEnemy extends Group{
                                                min_object.get_position(), min_object.velocity, min_object.angle_velocity, 
                                                min_object.radius, min_object.mass);
                     
-                    // window.alert("ID:" + String(this.enemy_id));
-                    // window.alert("Before velocity:" + String(this.velocity.x) + " " + String(this.velocity.y) + " " + String(this.velocity.z));
-                    // window.alert("Before velocity2:" + String(min_object.velocity.x) + " " + String(min_object.velocity.y) + " " + String(min_object.velocity.z));
-
+                    
                     var relative_velocity = {
                         x: this.velocity.x - min_object.velocity.x,
                         y: this.velocity.y - min_object.velocity.y,
@@ -138,11 +138,8 @@ class NormalEnemy extends Group{
                     this.velocity = ret.new_velocity1;
                     this.angle_velocity = ret.new_angle_velocity1;
 
-                    // window.alert("After velocity:" + String(this.velocity.x) + " " + String(this.velocity.y) + " " + String(this.velocity.z));
-                    // window.alert("After velocity2:" + String(ret.new_velocity2.x) + " " + String(ret.new_velocity2.y) + " " + String(ret.new_velocity2.z));
-
+                    
                     if (min_object.is_fix() == false) {
-                        // window.alert("IN:" + String(min_index) + " " + String(this.parent.update_list[min_index].enemy_id));
                         this.parent.update_list[min_index].velocity = ret.new_velocity2;
                         this.parent.update_list[min_index].angle_velocity = ret.new_angle_velocity2;
                     }
@@ -153,13 +150,7 @@ class NormalEnemy extends Group{
                     var energy = 0.5 * this.mass * (this.velocity.x * this.velocity.x + 
                                                     this.velocity.y * this.velocity.y +
                                                     this.velocity.z * this.velocity.z);
-                    // if (damage(energy) != 0) {
-                    //     window.alert("Before:" + String(this.blood) + " " + String(damage(energy)));
-                    // }
                     this.blood -= damage(energy);
-                    // if (damage(energy) != 0) {
-                    //     window.alert("After:" + String(this.blood));
-                    // }
 
                     this.velocity = retp.new_velocity;
                     this.angle_velocity = retp.new_angle_velocity;
@@ -177,12 +168,60 @@ class NormalEnemy extends Group{
                     continue;
                 }
             }
+            if (object.obj_type == 'wall') {
+                var ret_vector = object.get_direction(this.get_position());
+                var ret_norm = Math.sqrt(ret_vector.x * ret_vector.x + ret_vector.y * ret_vector.y + ret_vector.z * ret_vector.z);
+                if (ret_norm > this.radius) {
+                    continue;
+                }
+                if(ret_norm > 1e-8) {
+                    ret_vector.x /= ret_norm; ret_vector.y /= ret_norm; ret_vector.z /= ret_norm;
+                    var dir_test = this.velocity.x * ret_vector.x + this.velocity.y * ret_vector.y + this.velocity.z * ret_vector.z;
+                    if(dir_test > 0) {
+                        continue;
+                    }
+                    dir_test = - dir_test;
+                    var discount_coef = 0.9;
+                    var new_velocity = {
+                        x: (this.velocity.x + 2 * ret_vector.x * dir_test) * discount_coef + ret_vector.x * 0.0003 / ret_norm,
+                        y: (this.velocity.y + 2 * ret_vector.y * dir_test) * discount_coef + ret_vector.y * 0.0003 / ret_norm,
+                        z: (this.velocity.z + 2 * ret_vector.z * dir_test) * discount_coef + ret_vector.z * 0.0003 / ret_norm
+                    }
+                    var energy = 0.5 * this.mass * (this.velocity.x * this.velocity.x + 
+                                                    this.velocity.y * this.velocity.y +
+                                                    this.velocity.z * this.velocity.z);
+                    this.blood -= damage(energy);
+                    this.velocity = new_velocity;
+                }
+                continue;
+            }
             if (object.no_collision == true) {
                 continue;
             }
             if (object.is_intersect(this.enemy.position, this.radius)) {
                 if (object.geo == 'sphere') {
                     this.apply_anti_force_from_position(object.get_position());
+                }
+                else if (object.geo == 'plane') {
+                    var test_dir = object.normal.x * this.get_position().x + 
+                                   object.normal.y * this.get_position().y +
+                                   object.normal.z * this.get_position().z -
+                                   object.ground_coef;
+                    var test_norm = {
+                        x: object.normal.x,
+                        y: object.normal.y,
+                        z: object.normal.z
+                    };
+                    if(test_dir < 0) {
+                        test_norm.x = - test_norm.x; test_norm.y = - test_norm.y; test_norm.z = - test_norm.z;
+                        test_dir = - test_dir;
+                    }
+                    // if (this.get_position().y < -0.4) {
+                    //     window.alert("???:" + String(test_dir) + " " + String(test_norm.y));
+                    // }
+                    this.velocity.x += test_norm.x * 0.0003 / test_dir;
+                    this.velocity.y += test_norm.y * 0.0003 / test_dir;
+                    this.velocity.z += test_norm.z * 0.0003 / test_dir;
                 }
             }
         }
@@ -254,10 +293,10 @@ class NormalEnemy extends Group{
         if (x1 > x2) {
             var t = x1; x1 = x2; x2 = t;
         }
-        if (x2 < 0.1) {
+        if (x2 < 1e-4) {
             return 2;
         }
-        if (x1 < -0.1) {
+        if (x1 < -1e-4) {
             return x2;
         }
         return x1;

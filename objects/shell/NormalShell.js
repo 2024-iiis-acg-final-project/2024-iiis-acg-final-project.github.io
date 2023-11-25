@@ -145,12 +145,49 @@ class NormalShell extends Group {
                     continue;
                 }
             }
+            if (object.obj_type == 'wall') {
+                var ret_vector = object.get_direction(this.get_position());
+                var ret_norm = Math.sqrt(ret_vector.x * ret_vector.x + ret_vector.y * ret_vector.y + ret_vector.z * ret_vector.z);
+                if (ret_norm > this.radius) {
+                    continue;
+                }
+                if(ret_norm > 1e-8) {
+                    ret_vector.x /= ret_norm; ret_vector.y /= ret_norm; ret_vector.z /= ret_norm;
+                    var dir_test = this.velocity.x * ret_vector.x + this.velocity.y * ret_vector.y + this.velocity.z * ret_vector.z;
+                    if(dir_test > 0) {
+                        continue;
+                    }
+                    dir_test = - dir_test;
+                    var discount_coef = 0.9;
+                    var new_velocity = {
+                        x: (this.velocity.x + 2 * ret_vector.x * dir_test) * discount_coef + ret_vector.x * 0.001 / ret_norm,
+                        y: (this.velocity.y + 2 * ret_vector.y * dir_test) * discount_coef + ret_vector.y * 0.001 / ret_norm,
+                        z: (this.velocity.z + 2 * ret_vector.z * dir_test) * discount_coef + ret_vector.z * 0.001 / ret_norm
+                    }
+                    this.velocity = new_velocity;
+                }
+                continue;
+            }
             if (object.no_collision == true) {
                 continue;
             }
             if (object.is_intersect(this.shell.position, this.radius)) {
                 if (object.geo == 'sphere') {
                     this.apply_anti_force_from_position(object.get_position());
+                }
+                else if (object.geo == 'plane') {
+                    var test_dir = object.normal.x * this.get_position().x + 
+                                   object.normal.y * this.get_position().y +
+                                   object.normal.z * this.get_position().z -
+                                   object.ground_coef;
+                    var test_norm = object.normal;
+                    if(test_dir < 0) {
+                        test_norm.x = - test_norm.x; test_norm.y = - test_norm.y; test_norm.z = - test_norm.z;
+                        test_dir = - test_dir;
+                    }
+                    this.velocity.x += test_norm.x * 0.001 / test_dir;
+                    this.velocity.y += test_norm.y * 0.001 / test_dir;
+                    this.velocity.z += test_norm.z * 0.001 / test_dir;
                 }
             }
         }
@@ -222,10 +259,10 @@ class NormalShell extends Group {
         if (x1 > x2) {
             var t = x1; x1 = x2; x2 = t;
         }
-        if (x2 < 0.1) {
+        if (x2 < 1e-4) {
             return 2;
         }
-        if (x1 < -0.1) {
+        if (x1 < -1e-4) {
             return x2;
         }
         return x1;
