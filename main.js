@@ -7,7 +7,7 @@
 import * as THREE from 'three';
 import { StartScene } from './scenes';
 import WebGL from 'three/addons/capabilities/WebGL.js';
-import { build_new_scene, change_global_info, check_page_change, get_page_info, get_pause_state, Lock, set_page_info, set_pause_state } from './utils';
+import { build_new_scene, change_global_info, check_page_change, get_page_info, get_pause_state, Lock, set_page_info, set_pause_state, get_select_direction} from './utils';
 
 var scene = new StartScene();
 
@@ -79,6 +79,9 @@ window.addEventListener('keydown', event => {
 			else{
 				scene.update_by_press_key(key);
 			}
+		}
+		if (get_page_info() == 'select') {
+			scene.update_info(get_select_direction(key));
 		}
 	}
 	ReadInfoLock.release();

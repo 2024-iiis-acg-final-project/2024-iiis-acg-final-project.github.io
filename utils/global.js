@@ -1,7 +1,7 @@
 import { LessCompare } from "three";
 
 let PAGE_STATE = "start";
-let LEVEL = 0;
+let LEVEL = 1;
 let ON_PAUSE = false;
 
 function get_page_info() {
@@ -28,5 +28,22 @@ function set_pause_state(state) {
     ON_PAUSE = state;
 }
 
+function get_select_direction(key){
+    const page_info = get_page_info()
+    if (page_info == 'select' && key == "ArrowLeft") {
+        return -1;
+    }
+    if (page_info == 'select' && key == "ArrowRight") {
+        return 1;
+    }
+    if (page_info == 'select' && key == "ArrowUp") {
+        return -3;
+    }
+    if (page_info == 'select' && key == "ArrowDown") {
+        return 3;
+    }
+    return 0;
+}
 
-export {get_page_info, set_page_info, get_level, set_level, get_pause_state, set_pause_state}
+
+export {get_page_info, set_page_info, get_level, set_level, get_pause_state, set_pause_state, get_select_direction}
