@@ -25,7 +25,7 @@ class NormalShell extends Group {
         this.radius = 0.1
         this.small_velocity_period = 0
 
-        this.mass = 50;
+        this.mass = 10;
 
         this.shell_state = "wait"; // state should in ["wait", "attacking", "used"]
 
