@@ -7,6 +7,7 @@ class LaunchPad extends Group {
         this.parent = parent;
         this.name = 'launch_pad';
         this.obj_type = 'launch_pad';
+        this.geo = 'none';
 
         const vertices = new Float32Array([
             -0.2, -0.2, 0.2,

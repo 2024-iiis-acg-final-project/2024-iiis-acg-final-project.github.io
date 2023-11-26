@@ -129,7 +129,7 @@ function SphereWithPlane(velocity, angle_velocity, radius, norm) {
 }
 
 function damage(energy) {
-    if (energy * 2000 < 1) {
+    if (energy * 2000 < 3) {
         return 0;
     }
     else {

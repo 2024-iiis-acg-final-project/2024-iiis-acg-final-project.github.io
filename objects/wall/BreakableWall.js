@@ -1,15 +1,16 @@
 import { Group, PlaneGeometry, Mesh, MeshPhongMaterial, MeshStandardMaterial, BoxGeometry } from "three";
 
-class NormalWall extends Group {
+class BreakableWall extends Group {
     constructor(parent, id, cfg) {
         super();
         this.parent = parent;
-        this.name = 'normal_wall';
+        this.name = 'breakable_wall';
         this.obj_type = 'wall';
         this.geo = 'cube';
         this.wall_id = id;
+        this.blood = 150;
 
-        this.wall = new Mesh(new BoxGeometry(cfg['length'], cfg['hight'], cfg['width']), new MeshStandardMaterial({color: 0xffaaaa}));
+        this.wall = new Mesh(new BoxGeometry(cfg['length'], cfg['hight'], cfg['width']), new MeshStandardMaterial({color: 0xffff00}));
         this.wall.position.set(cfg['x'], cfg['y'], cfg['z']);
 
         this.min_x = cfg['x'] - cfg['length'] / 2; this.max_x = cfg['x'] + cfg['length'] / 2;
@@ -59,8 +60,16 @@ class NormalWall extends Group {
     }
 
     update(){
+        this.parent.remove(this.wall);
 
+        if(this.blood > 0) {
+            this.wall.material = new MeshStandardMaterial({color: 0xffff00 + Math.floor(0xff * (150 - this.blood) / 150)});
+            this.parent.add(this.wall);
+        }
+        else {
+            this.no_collision = true;
+        }
     }
 }
 
-export default NormalWall;
+export default BreakableWall;

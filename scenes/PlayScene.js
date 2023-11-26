@@ -29,6 +29,7 @@ class PlayScene extends Scene {
                     load_shell(this, shell_type, shell_id);
                     shell_id += 1;
                 }
+                this.final_shell_id = shell_id;
                 var wall_id = 0;
                 for (let wall_cfg of levelConfigs['wall']) {
                     load_wall(this, wall_cfg['id'], wall_id, wall_cfg['cfg']);
@@ -40,6 +41,7 @@ class PlayScene extends Scene {
             })
 
         this.add_light();
+        this.debug_cnt = 0;
     }
 
     addToUpdateList(object) {
@@ -92,6 +94,19 @@ class PlayScene extends Scene {
             }
             object.update()
         }
+        // this.debug_cnt = this.debug_cnt + 1;
+        // if (this.debug_cnt == 1000) {
+        //     this.debug_cnt = 0;
+        //     var alive_cnt = 0;
+        //     for (let object of this.update_list) {
+        //         if (object.obj_type == 'enemy') {
+        //             if(object.blood > 0) {
+        //                 alive_cnt += 1;
+        //             }
+        //         }
+        //     }
+        //     window.alert("Alive:" + String(alive_cnt));
+        // }
     }
 
     set_first_shell_attack(force, x_angle, y_angle, length) {

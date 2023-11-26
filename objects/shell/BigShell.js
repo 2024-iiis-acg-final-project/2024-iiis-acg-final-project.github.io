@@ -1,13 +1,14 @@
 import {Group, Mesh, SphereGeometry, MeshStandardMaterial} from 'three';
 import {SphereWithPlane, SphereWithSphere, damage} from '../../pyhsis'
+import SubBigShell from './SubBigShell';
 
-class NormalShell extends Group {
+class BigShell extends Group {
     constructor(parent, id) {
         super();
 
         this.parent = parent;
         this.shell_id = id;
-        this.name = "normal_shell";
+        this.name = "big_shell";
         this.obj_type = "shell";
         this.geo = 'sphere';
 
@@ -22,14 +23,17 @@ class NormalShell extends Group {
             z: 0
         }
         this.no_collision = false;
-        this.radius = 0.1
-        this.small_velocity_period = 0
+        this.radius = 0.15;
+        this.small_velocity_period = 0;
 
-        this.mass = 10;
+        this.collision_happened = false;
+        this.subshell_created = false;
+
+        this.mass = 30;
 
         this.shell_state = "wait"; // state should in ["wait", "attacking", "used"]
 
-        this.shell = new Mesh(new SphereGeometry(0.1, 32, 32), new MeshStandardMaterial({ color: 0x00ff00 }));
+        this.shell = new Mesh(new SphereGeometry(0.15, 32, 32), new MeshStandardMaterial({ color: 0x00ff00 }));
 
         this.parent.addToUpdateList(this);
         this.parent.add(this.shell);
@@ -100,6 +104,7 @@ class NormalShell extends Group {
             else {
                 this.move_time(min_t);
                 remain_step -= min_t;
+                this.collision_happened = true;
                 
                 if (min_object.geo == 'sphere') {
                     var ret = SphereWithSphere(this.get_position(), this.velocity, this.angle_velocity, this.radius, this.mass,
@@ -153,6 +158,7 @@ class NormalShell extends Group {
                     continue;
                 }
                 if(ret_norm > 1e-8) {
+                    this.collision_happened = true;
                     ret_vector.x /= ret_norm; ret_vector.y /= ret_norm; ret_vector.z /= ret_norm;
                     var dir_test = this.velocity.x * ret_vector.x + this.velocity.y * ret_vector.y + this.velocity.z * ret_vector.z;
                     if(dir_test > 0) {
@@ -177,6 +183,7 @@ class NormalShell extends Group {
             }
             if (object.is_intersect(this.shell.position, this.radius)) {
                 var ret_vector = null;
+                this.collision_happened = true;
                 if (object.geo == 'sphere') {
                     var tmp1 = object.get_position(), tmp2 = this.get_position();
                     ret_vector = {
@@ -330,6 +337,34 @@ class NormalShell extends Group {
             this.decay_velocity();
         }
 
+        if (this.collision_happened == true) {
+            this.shell_state = 'used';
+            if (this.subshell_created == false) {
+                this.subshell_created = true;
+                var sub_shell_num = Math.floor(Math.random() * 5) + 5;
+                for (let i = 0; i < sub_shell_num; i++) {
+                    let u = Math.random(), v = Math.random();
+                    let theta = 2 * Math.PI * u, phi = Math.acos(2 * v - 1);
+                    let v_norm = Math.random() / 1.5 + 0.75;
+                    var new_velocity = {
+                        x: Math.sin(phi) * Math.cos(theta) * v_norm,
+                        y: Math.sin(phi) * Math.sin(theta) * v_norm,
+                        z: Math.cos(phi) * v_norm
+                    }
+                    var new_position = {
+                        x: this.get_position().x + new_velocity.x * this.radius,
+                        y: this.get_position().y + new_velocity.y * this.radius,
+                        z: this.get_position().z + new_velocity.z * this.radius
+                    }
+                    new_velocity.x = new_velocity.x * 0.1 + this.velocity.x;
+                    new_velocity.y = new_velocity.y * 0.1 + this.velocity.y;
+                    new_velocity.z = new_velocity.z * 0.1 + this.velocity.z;
+                    const sub_shell = new SubBigShell(this.parent, this.parent.final_shell_id, new_position, new_velocity);
+                    this.parent.final_shell_id += 1;
+                }
+            }
+        }
+
         if (this.shell_state != 'used') {
             this.remove_flag = false;
             this.parent.add(this.shell);
@@ -340,4 +375,4 @@ class NormalShell extends Group {
     }
 }
 
-export default NormalShell;
+export default BigShell;

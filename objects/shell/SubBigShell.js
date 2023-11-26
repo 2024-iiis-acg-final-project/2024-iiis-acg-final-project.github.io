@@ -1,20 +1,20 @@
 import {Group, Mesh, SphereGeometry, MeshStandardMaterial} from 'three';
 import {SphereWithPlane, SphereWithSphere, damage} from '../../pyhsis'
 
-class NormalShell extends Group {
-    constructor(parent, id) {
+class SubBigShell extends Group {
+    constructor(parent, id, position, velocity) {
         super();
 
         this.parent = parent;
         this.shell_id = id;
-        this.name = "normal_shell";
+        this.name = "sub_big_shell";
         this.obj_type = "shell";
         this.geo = 'sphere';
 
         this.velocity = {
-            x: 0,
-            y: 0,
-            z: 0
+            x: velocity.x,
+            y: velocity.y,
+            z: velocity.z
         }
         this.angle_velocity = {
             x: 0,
@@ -22,14 +22,15 @@ class NormalShell extends Group {
             z: 0
         }
         this.no_collision = false;
-        this.radius = 0.1
+        this.radius = 0.075
         this.small_velocity_period = 0
 
-        this.mass = 10;
+        this.mass = 5;
 
-        this.shell_state = "wait"; // state should in ["wait", "attacking", "used"]
+        this.shell_state = "attacking"; // state should in ["wait", "attacking", "used"]
 
-        this.shell = new Mesh(new SphereGeometry(0.1, 32, 32), new MeshStandardMaterial({ color: 0x00ff00 }));
+        this.shell = new Mesh(new SphereGeometry(0.075, 32, 32), new MeshStandardMaterial({ color: 0x00ff00 }));
+        this.shell.position.set(position.x, position.y, position.z);
 
         this.parent.addToUpdateList(this);
         this.parent.add(this.shell);
@@ -161,9 +162,9 @@ class NormalShell extends Group {
                     dir_test = - dir_test;
                     var discount_coef = 0.9;
                     var new_velocity = {
-                        x: (this.velocity.x + 2 * ret_vector.x * dir_test) * discount_coef + ret_vector.x * 0.001 / ret_norm,
-                        y: (this.velocity.y + 2 * ret_vector.y * dir_test) * discount_coef + ret_vector.y * 0.001 / ret_norm,
-                        z: (this.velocity.z + 2 * ret_vector.z * dir_test) * discount_coef + ret_vector.z * 0.001 / ret_norm
+                        x: (this.velocity.x + 2 * ret_vector.x * dir_test) * discount_coef + ret_vector.x * 0.0003 / ret_norm,
+                        y: (this.velocity.y + 2 * ret_vector.y * dir_test) * discount_coef + ret_vector.y * 0.0003 / ret_norm,
+                        z: (this.velocity.z + 2 * ret_vector.z * dir_test) * discount_coef + ret_vector.z * 0.0003 / ret_norm
                     }
                     var energy = 0.5 * this.mass * (this.velocity.x * this.velocity.x + 
                                                     this.velocity.y * this.velocity.y +
@@ -340,4 +341,4 @@ class NormalShell extends Group {
     }
 }
 
-export default NormalShell;
+export default SubBigShell;

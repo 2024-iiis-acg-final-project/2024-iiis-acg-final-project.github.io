@@ -32,18 +32,22 @@ class NormalEnemy extends Group{
 
         parent.addToUpdateList(this);
         this.parent.add(this.enemy);
+        this.remove_flag = false;
     }
 
     update() {
-        this.parent.remove(this.enemy);
+        if(this.remove_flag == false) {
+            this.remove_flag = true;
+            this.parent.remove(this.enemy);
+        }
 
         this.enemy.material = new MeshStandardMaterial({color: 0x0000ff + Math.floor((100 - this.blood) / 100 * 0xff) * (0x10000)});
 
-        this.move_step();
-        this.apply_g();
-        this.decay_velocity();
-
         if (this.blood > 0) {
+            this.move_step();
+            this.apply_g();
+            this.decay_velocity();
+            this.remove_flag = false;
             this.parent.add(this.enemy);
         }
         else {
@@ -66,9 +70,9 @@ class NormalEnemy extends Group{
         this.enemy.rotation.x += this.angle_velocity.x * t;
         this.enemy.rotation.y += this.angle_velocity.y * t;
         this.enemy.rotation.z += this.angle_velocity.z * t;
-        if (this.enemy.position.x < -100 || this.enemy.position.x > 100 ||
+        if (this.enemy.position.x < -15 || this.enemy.position.x > 15 ||
             this.enemy.position.y < -100 || this.enemy.position.y > 100 ||
-            this.enemy.position.z < -100 || this.enemy.position.z > 100) {
+            this.enemy.position.z < -15 || this.enemy.position.z > 2) {
                 this.blood = 0;
         }
     }
@@ -90,7 +94,7 @@ class NormalEnemy extends Group{
                         continue;
                     }
                 }
-                if (object.no_collision == true) {
+                if (object.no_collision == true|| object.geo == 'cube') {
                     continue;
                 }
                 let this_t = object.cal_min_t(this.enemy.position, this.velocity, this.radius);
@@ -130,9 +134,6 @@ class NormalEnemy extends Group{
                                                         relative_velocity.y * relative_velocity.y +
                                                         relative_velocity.z * relative_velocity.z);
                         this.parent.update_list[min_index].blood -= damage(energy);
-                        if (this.parent.update_list[min_index].blood <= 0){
-                            this.parent.remove(this.parent.update_list[min_index]);
-                        }
                     }
 
                     this.velocity = ret.new_velocity1;
@@ -168,6 +169,9 @@ class NormalEnemy extends Group{
                     continue;
                 }
             }
+            if (object.no_collision == true) {
+                continue;
+            }
             if (object.obj_type == 'wall') {
                 var ret_vector = object.get_direction(this.get_position());
                 var ret_norm = Math.sqrt(ret_vector.x * ret_vector.x + ret_vector.y * ret_vector.y + ret_vector.z * ret_vector.z);
@@ -191,37 +195,67 @@ class NormalEnemy extends Group{
                                                     this.velocity.y * this.velocity.y +
                                                     this.velocity.z * this.velocity.z);
                     this.blood -= damage(energy);
+                    if (object.name == 'breakable_wall') {
+                        object.blood -= damage(energy);
+                    }
                     this.velocity = new_velocity;
                 }
                 continue;
             }
-            if (object.no_collision == true) {
-                continue;
-            }
             if (object.is_intersect(this.enemy.position, this.radius)) {
+                var ret_vector = null;
                 if (object.geo == 'sphere') {
-                    this.apply_anti_force_from_position(object.get_position());
+                    var tmp1 = object.get_position(), tmp2 = this.get_position();
+                    ret_vector = {
+                        x: tmp2.x - tmp1.x,
+                        y: tmp2.y - tmp1.y,
+                        z: tmp2.z - tmp1.z
+                    }
+                    // this.apply_anti_force_from_position(object.get_position());
                 }
                 else if (object.geo == 'plane') {
                     var test_dir = object.normal.x * this.get_position().x + 
                                    object.normal.y * this.get_position().y +
                                    object.normal.z * this.get_position().z -
                                    object.ground_coef;
-                    var test_norm = {
+                    // var test_norm = object.normal;
+                    ret_vector = {
                         x: object.normal.x,
                         y: object.normal.y,
                         z: object.normal.z
-                    };
-                    if(test_dir < 0) {
-                        test_norm.x = - test_norm.x; test_norm.y = - test_norm.y; test_norm.z = - test_norm.z;
-                        test_dir = - test_dir;
                     }
-                    // if (this.get_position().y < -0.4) {
-                    //     window.alert("???:" + String(test_dir) + " " + String(test_norm.y));
-                    // }
-                    this.velocity.x += test_norm.x * 0.0003 / test_dir;
-                    this.velocity.y += test_norm.y * 0.0003 / test_dir;
-                    this.velocity.z += test_norm.z * 0.0003 / test_dir;
+                    if(test_dir < 0) {
+                        ret_vector.x *= -1; ret_vector.y *= -1; ret_vector.z *= -1;
+                        // test_norm.x = - test_norm.x; test_norm.y = - test_norm.y; test_norm.z = - test_norm.z;
+                        // test_dir = - test_dir;
+                    }
+                    
+                    // this.velocity.x += test_norm.x * 0.001 / test_dir;
+                    // this.velocity.y += test_norm.y * 0.001 / test_dir;
+                    // this.velocity.z += test_norm.z * 0.001 / test_dir;
+                }
+                else {
+                    // Not support yet
+                    ret_vector = {
+                        x: 0,
+                        y: 0,
+                        z: 0
+                    }
+                }
+                var ret_norm = Math.sqrt(ret_vector.x * ret_vector.x + ret_vector.y * ret_vector.y + ret_vector.z * ret_vector.z);
+                if(ret_norm > 1e-8) {
+                    ret_vector.x /= ret_norm; ret_vector.y /= ret_norm; ret_vector.z /= ret_norm;
+                    var dir_test = this.velocity.x * ret_vector.x + this.velocity.y * ret_vector.y + this.velocity.z * ret_vector.z;
+                    if(dir_test > 0) {
+                        continue;
+                    }
+                    dir_test = - dir_test;
+                    var new_velocity = {
+                        x: (this.velocity.x + 2 * ret_vector.x * dir_test) + ret_vector.x * 0.001 / ret_norm,
+                        y: (this.velocity.y + 2 * ret_vector.y * dir_test) + ret_vector.y * 0.001 / ret_norm,
+                        z: (this.velocity.z + 2 * ret_vector.z * dir_test) + ret_vector.z * 0.001 / ret_norm
+                    }
+                    this.velocity = new_velocity;
                 }
             }
         }
