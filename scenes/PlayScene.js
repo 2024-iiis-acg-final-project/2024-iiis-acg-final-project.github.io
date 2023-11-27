@@ -4,6 +4,7 @@ import { load_launch_pad } from '../objects/launchPad';
 import { load_enemy } from '../objects/enemy';
 import { load_shell } from '../objects/shell';
 import { load_wall } from '../objects/wall';
+import { load_tool } from '../objects/tool';
 
 class PlayScene extends Scene {
     constructor(level) {
@@ -34,6 +35,11 @@ class PlayScene extends Scene {
                 for (let wall_cfg of levelConfigs['wall']) {
                     load_wall(this, wall_cfg['id'], wall_id, wall_cfg['cfg']);
                     wall_id += 1;
+                }
+                var tool_id = 0;
+                for (let tool_cfg of levelConfigs['tool'] ) {
+                    load_tool(this, tool_cfg, tool_id);
+                    tool_id += 1;
                 }
             })
             .then(error => {
@@ -161,6 +167,9 @@ class PlayScene extends Scene {
             for (let object of this.update_list) {
                 if (object.name == 'launch_pad') {
                     object.update_by_press_key(key);
+                }
+                if (object.name == 'bomb_shell' && object.shell_state == 'attacking' && key == ' ') {
+                    object.shell_state = 'used';
                 }
             }
         }
