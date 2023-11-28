@@ -53,6 +53,7 @@ function change_global_info(key) {
         return false;
     }
     if (page_info == 'play' && get_pause_state() == true && key == 'e') {
+        set_level(1);
         set_page_info('select');
         set_pause_state(false);
         return true;
@@ -64,6 +65,7 @@ function change_global_info(key) {
     }
     if (page_info == 'end' && key == 'e') {
         set_pause_state(false);
+        set_level(1);
         set_page_info('select');
         return true;
     }
