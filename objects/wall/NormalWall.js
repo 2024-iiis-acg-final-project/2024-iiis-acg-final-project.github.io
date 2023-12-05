@@ -1,4 +1,5 @@
-import { Group, PlaneGeometry, Mesh, MeshPhongMaterial, MeshStandardMaterial, BoxGeometry } from "three";
+import { Group, PlaneGeometry, Mesh, MeshBasicMaterial, MeshStandardMaterial, BoxGeometry, TextureLoader, RepeatWrapping } from "three";
+import * as THREE from 'three';
 
 class NormalWall extends Group {
     constructor(parent, id, cfg) {
@@ -8,18 +9,56 @@ class NormalWall extends Group {
         this.obj_type = 'wall';
         this.geo = 'cube';
         this.wall_id = id;
+        this.cfg = cfg;
 
-        this.wall = new Mesh(new BoxGeometry(cfg['length'], cfg['hight'], cfg['width']), new MeshStandardMaterial({color: 0xffaaaa}));
-        this.wall.position.set(cfg['x'], cfg['y'], cfg['z']);
+        const textureLoader = new TextureLoader();
+
+        textureLoader.load(
+            './objects/wall/pic/brick.jpg',
+            function (texture) {
+                texture.wrapS = RepeatWrapping;
+                texture.wrapT = RepeatWrapping;
+                
+                const repeatX = cfg['length'] / 2;
+                const repeatY = cfg['hight'] / 2;
+                const repeatZ = cfg['width'] / 2;
+
+                // const material = new MeshStandardMaterial({map: texture});
+                const materials = [
+                    new MeshStandardMaterial({map: texture.clone()}),
+                    new MeshStandardMaterial({map: texture.clone()}),
+                    new MeshStandardMaterial({map: texture.clone()}),
+                    new MeshStandardMaterial({map: texture.clone()}),
+                    new MeshStandardMaterial({map: texture.clone()}),
+                    new MeshStandardMaterial({map: texture.clone()})
+                ];
+
+                materials[0].map.repeat.set(repeatZ, repeatY);
+                materials[1].map.repeat.set(repeatZ, repeatY);
+                materials[2].map.repeat.set(repeatX, repeatZ);
+                materials[3].map.repeat.set(repeatX, repeatZ);
+                materials[4].map.repeat.set(repeatX, repeatY);
+                materials[5].map.repeat.set(repeatX, repeatY);
+
+                const geometry = new BoxGeometry(cfg['length'], cfg['hight'], cfg['width']);
+
+                this.wall = new Mesh(geometry, materials);
+                this.wall.position.set(cfg['x'], cfg['y'], cfg['z']);
+                this.parent.add(this.wall);
+
+            }.bind(this),
+            undefined,
+            function ( err ) {
+                window.alert( 'An error happened.' );
+            }
+        );
 
         this.min_x = cfg['x'] - cfg['length'] / 2; this.max_x = cfg['x'] + cfg['length'] / 2;
         this.min_y = cfg['y'] - cfg['hight'] / 2; this.max_y = cfg['y'] + cfg['hight'] / 2;
         this.min_z = cfg['z'] - cfg['width'] / 2; this.max_z = cfg['z'] + cfg['width'] / 2;
 
         this.no_collision = false;
-        // The collision are calcualte by filed, which is different from sphere and plane
         parent.addToUpdateList(this);
-        this.parent.add(this.wall);
     }
 
     get_direction(position) {
@@ -59,7 +98,6 @@ class NormalWall extends Group {
     }
 
     update(){
-
     }
 }
 
