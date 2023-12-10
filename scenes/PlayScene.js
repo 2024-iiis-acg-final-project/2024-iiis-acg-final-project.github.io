@@ -97,6 +97,13 @@ class PlayScene extends Scene {
     update_in_pause_state() {
         if (this.pause_state == false) {
             this.pause_state = true;
+
+            for (let object of this.update_list) {
+                if (object.obj_type == 'launch_pad') {
+                    object.unrender_force();
+                }
+            }
+
             for (let light of this.normal_light_list) {
                 this.remove(light);
             }

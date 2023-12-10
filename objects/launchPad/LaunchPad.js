@@ -153,6 +153,10 @@ class LaunchPad extends Group {
         }
     }
 
+    unrender_force() {
+        this.parent.remove(this.force_render);
+    }
+
     update() {
         this.parent.remove(this.force_render);
         if (!this.attacking) {
