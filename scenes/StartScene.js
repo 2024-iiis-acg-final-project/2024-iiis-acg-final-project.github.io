@@ -1,80 +1,66 @@
 import * as THREE from 'three';
 import { FontLoader } from 'three/addons/loaders/FontLoader.js';
 import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
+import { TextureLoader, PlaneGeometry, MeshBasicMaterial, Mesh } from 'three';
 
 class StartScene extends THREE.Scene {
     constructor() {
         super();
-        const geometry = new THREE.BoxGeometry( 1, 1, 1 );
-        const material = new THREE.MeshStandardMaterial( { color: 0x00ff00 } );
-        // let cube = new THREE.Mesh( geometry, material );
-        // cube.position.set(0, 2, 0);
-        // this.cube = cube
-        // this.add( this.cube );
 
-        let title_mesh;
-        let text_mesh;
+        const titleTexture = new TextureLoader().load('./objects/picture/title.png');
+        const titleMaterial = new MeshBasicMaterial({ map: titleTexture,
+                                                      alphaTest: 0,
+                                                      transparent: true});
+        const titleGeometry = new PlaneGeometry(6.06144, 1.49184);
+        this.title = new Mesh(titleGeometry, titleMaterial);
+        this.title.position.set(0, 2, 0);
+        this.add(this.title);
 
-        var loader = new FontLoader();
+        const subtitleTexture = new TextureLoader().load('./objects/picture/subtitle.png');
+        const subtitleMaterial = new MeshBasicMaterial({ map: subtitleTexture,
+                                                         alphaTest: 0,
+                                                         transparent: true});
+        const subtitleGeometry = new PlaneGeometry(2.81, 0.505);
+        this.subtitle = new Mesh(subtitleGeometry, subtitleMaterial);
+        this.subtitle.position.set(2, 1.2, 1.1);
+        this.subtitle.rotation.set(0, 0, Math.PI / 8)
+        this.add(this.subtitle);
 
-        loader.load( './style/font.json', function ( font ) {
-            const title_geometry = new TextGeometry( 'Shell Shock', {
-                font: font,
-                size: 60,
-                height: 5,
-                curveSegments: 12,
-                bevelEnabled: true,
-                bevelThickness: 1,
-                bevelSize: 1,
-                bevelSegments: 2
-            } );
-
-            const text_geometry = new TextGeometry( 'Press Space to Select Level', {
-                font: font,
-                size: 60,
-                height: 5,
-                curveSegments: 12,
-                bevelEnabled: true,
-                bevelThickness: 1,
-                bevelSize: 1,
-                bevelSegments: 2
-            } );
-
-            title_geometry.computeBoundingBox();
-            const centerOffset = - 0.5 * ( title_geometry.boundingBox.max.x - title_geometry.boundingBox.min.x );
-
-            const title_material = new THREE.MeshStandardMaterial( { color: 0xffffff } );
-            title_mesh = new THREE.Mesh(title_geometry, title_material);
-            
-            title_mesh.position.set(centerOffset, 100, -300);
-            title_mesh.rotation.set(0, Math.PI * 2, 0);
-
-            this.title_mesh = title_mesh;
-            this.add(this.title_mesh);
-
-            text_geometry.computeBoundingBox();
-            const text_material = new THREE.MeshStandardMaterial( { color: 0xf7dd19 } );
-            text_mesh = new THREE.Mesh(text_geometry, title_material);
-
-            const text_centerOffset = - 0.5 * ( text_geometry.boundingBox.max.x - text_geometry.boundingBox.min.x );
-            text_mesh.position.set(text_centerOffset, 10, -1000);
-            text_mesh.rotation.set(0, Math.PI * 2, 0);
-
-            this.text_mesh = text_mesh;
-            this.add(this.text_mesh);
-
-        }.bind(this) );
-
-        this.add( new THREE.AmbientLight( 0x777777 ) );
-        const directionalLight = new THREE.DirectionalLight( 0xffffff, 1 );
-        directionalLight.position.set(100, 100, 100);
-        this.add( directionalLight );
+        const pressTexture = new TextureLoader().load('./objects/picture/press.png');
+        const pressMaterial = new MeshBasicMaterial({ map: pressTexture,
+                                                      alphaTest: 0,
+                                                      transparent: true});
+        const pressGeometry = new PlaneGeometry(4.46, 0.78);
+        this.press = new Mesh(pressGeometry, pressMaterial);
+        this.press.position.set(0, -0.5, 0);
+        this.add(this.press);
         
+        const bgTexture = new TextureLoader().load('./objects/picture/background2.png');
+
+        const bgGeometry = new PlaneGeometry(1280, 720);
+        const bgMaterial = new MeshBasicMaterial({ map: bgTexture, side: THREE.DoubleSide });
+        this.backgroundMesh = new Mesh(bgGeometry, bgMaterial);
+        this.backgroundMesh.position.set(0, 0, -250); // Adjust the Z position to be behind other objects
+        this.add(this.backgroundMesh);
     }
 
     update() {
         // this.cube.rotation.x += 0.01;
         // this.cube.rotation.y += 0.01;
+        const elapsedTime = Date.now() * 0.001; // Convert to seconds
+
+        // Calculate movement based on elapsed time
+        const speedX = 0.2;
+        const speedY = 0.5;
+        const movementX = Math.sin(elapsedTime * speedX);
+        const movementY = Math.cos(elapsedTime * speedY);
+
+        // Update background position
+        this.backgroundMesh.position.set(movementX * 200, movementY * 100, -250);
+
+        const speed_sub_title = 2;
+        const movementSubTitle = Math.sin(elapsedTime * speed_sub_title);
+        this.subtitle.position.z = 1 + movementSubTitle * 0.1;
     }
 }
 
