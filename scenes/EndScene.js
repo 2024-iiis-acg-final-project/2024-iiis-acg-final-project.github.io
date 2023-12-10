@@ -3,7 +3,7 @@ import { FontLoader } from 'three/addons/loaders/FontLoader.js';
 import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
 
 class EndScene extends THREE.Scene {
-    constructor() {
+    constructor(success) {
         super();
         const geometry = new THREE.BoxGeometry( 1, 1, 1 );
         const material = new THREE.MeshStandardMaterial( { color: 0x00ff00 } );
@@ -14,10 +14,16 @@ class EndScene extends THREE.Scene {
 
         let title_mesh;
 
+        this.success = success;
+
         var loader = new FontLoader();
 
         loader.load( './style/font.json', function ( font ) {
-            const title_geometry = new TextGeometry( 'Game Over!', {
+            var textString = "You Win!";
+            if (this.success == false) {
+                textString = "You Loss!";
+            }
+            const title_geometry = new TextGeometry( textString, {
                 font: font,
                 size: 70,
                 height: 20,

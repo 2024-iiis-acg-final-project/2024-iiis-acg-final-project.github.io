@@ -1,4 +1,4 @@
-import { get_page_info, set_page_info, get_level, set_level, get_pause_state, set_pause_state } from "./global";
+import { get_page_info, set_page_info, get_level, set_level, get_pause_state, set_pause_state, get_success_flag } from "./global";
 import { StartScene, EndScene, SelectScene, PlayScene } from '../scenes';
 import { SpotLight } from "three";
 
@@ -8,7 +8,7 @@ function build_new_scene() {
         return new StartScene();
     }
     if (page_info == 'end') {
-        return new EndScene();
+        return new EndScene(get_success_flag());
     }
     if (page_info == 'play') {
         return new PlayScene(get_level());

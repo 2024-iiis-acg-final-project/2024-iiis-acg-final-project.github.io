@@ -7,7 +7,7 @@
 import * as THREE from 'three';
 import { StartScene } from './scenes';
 import WebGL from 'three/addons/capabilities/WebGL.js';
-import { build_new_scene, change_global_info, check_page_change, get_page_info, get_pause_state, Lock, set_page_info, set_pause_state, get_select_direction} from './utils';
+import { build_new_scene, change_global_info, check_page_change, get_page_info, get_pause_state, Lock, set_page_info, set_pause_state, get_select_direction, set_success_flag} from './utils';
 
 var scene = new StartScene();
 
@@ -28,12 +28,16 @@ const onAnimationFrameHandler = (timeStamp) => {
 	if (!get_pause_state() || get_page_info() != 'play') {
 		scene.update();
 	}
+	if (get_pause_state() && get_page_info() == 'play') {
+		scene.update_in_pause_state();
+	}
 	if (get_page_info() == 'play') {
 		scene.set_camera(camera);
 		if (scene.is_terminal()) {
 			scene.reset_camera(camera);
 			set_page_info('end');
 			set_pause_state(false);
+			set_success_flag(scene.success);
 			scene = build_new_scene();
 		}
 	}

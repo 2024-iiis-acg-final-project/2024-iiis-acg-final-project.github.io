@@ -14,14 +14,14 @@ class NormalWall extends Group {
         const textureLoader = new TextureLoader();
 
         textureLoader.load(
-            './objects/wall/pic/brick.jpg',
+            './objects/wall/pic/brick2.jpg',
             function (texture) {
                 texture.wrapS = RepeatWrapping;
                 texture.wrapT = RepeatWrapping;
                 
-                const repeatX = cfg['length'] / 2;
-                const repeatY = cfg['hight'] / 2;
-                const repeatZ = cfg['width'] / 2;
+                const repeatX = cfg['length'] / 5;
+                const repeatY = cfg['hight'] / 5;
+                const repeatZ = cfg['width'] / 5;
 
                 // const material = new MeshStandardMaterial({map: texture});
                 const materials = [
