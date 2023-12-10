@@ -7,7 +7,7 @@
 import * as THREE from 'three';
 import { StartScene } from './scenes';
 import WebGL from 'three/addons/capabilities/WebGL.js';
-import { build_new_scene, change_global_info, check_page_change, get_page_info, get_pause_state, Lock, set_page_info, set_pause_state, get_select_direction, set_success_flag} from './utils';
+import { build_new_scene, change_global_info, check_page_change, get_page_info, get_pause_state, Lock, set_page_info, set_pause_state, get_select_direction, set_success_flag, get_pause_click, set_pause_click} from './utils';
 
 var scene = new StartScene();
 
@@ -22,6 +22,14 @@ camera.position.z = 5;
 const ReadInfoLock = new Lock();
 const WriteInfoLock = new Lock();
 
+function get_camera() {
+	return camera;
+}
+
+function get_renderer() {
+	return renderer;
+}
+
 // Render loop
 const onAnimationFrameHandler = (timeStamp) => {
 	WriteInfoLock.acquire();
@@ -29,7 +37,25 @@ const onAnimationFrameHandler = (timeStamp) => {
 		scene.update();
 	}
 	if (get_pause_state() && get_page_info() == 'play') {
-		scene.update_in_pause_state();
+		scene.update_in_pause_state(renderer);
+		const pause_click = get_pause_click();
+		if (pause_click == 'continue') {
+			set_pause_state(false);
+			set_pause_click("none");
+		}
+		else if (pause_click == 'retry') {
+			set_pause_state(false);
+			set_pause_click("none");
+			scene.reset_camera(camera);
+			scene = build_new_scene();
+		}
+		else if (pause_click == 'exit') {
+			set_pause_state(false);
+			set_page_info('select');
+			set_pause_click("none");
+			scene.reset_camera(camera);
+			scene = build_new_scene();
+		}
 	}
 	if (get_page_info() == 'play') {
 		scene.set_camera(camera);
@@ -98,3 +124,5 @@ window.addEventListener('keyup', event => {
 		scene.update_by_release_key(key);
 	}
 })
+
+export {get_camera, get_renderer};

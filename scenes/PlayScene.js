@@ -1,4 +1,6 @@
-import {AmbientLight, DirectionalLight, PointLight, Scene, MeshStandardMaterial, Color, Mesh, Group} from 'three';
+import {AmbientLight, DirectionalLight, PointLight, Scene, 
+        MeshStandardMaterial, TextureLoader, Mesh, Group, 
+        MeshBasicMaterial, PlaneGeometry, Raycaster, Vector3} from 'three';
 import { FontLoader } from 'three/addons/loaders/FontLoader.js';
 import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
 import { load_ground } from '../objects/grounds';
@@ -7,6 +9,8 @@ import { load_enemy } from '../objects/enemy';
 import { load_shell } from '../objects/shell';
 import { load_wall } from '../objects/wall';
 import { load_tool } from '../objects/tool';
+import { get_camera, get_renderer } from '../main';
+import { set_pause_click } from '../utils';
 
 class PlayScene extends Scene {
     constructor(level) {
@@ -94,7 +98,147 @@ class PlayScene extends Scene {
         this.pause_light_list.push(pause_directionalLight);    
     }
 
+    onMouseMove(event) {
+        // Calculate mouse coordinates in normalized device coordinates (NDC)
+        const mouse = {
+            x: (event.clientX / window.innerWidth) * 2 - 1,
+            y: -(event.clientY / window.innerHeight) * 2 + 1,
+        };
+
+        // Create a raycaster and check for intersections with your buttons
+        const raycaster = new Raycaster();
+        const vector = new Vector3(mouse.x, mouse.y, 0.5);
+        const camera = get_camera();
+        vector.unproject(camera);
+        raycaster.set(camera.position, vector.sub(camera.position).normalize());
+
+        // Define the objects you want to check for intersection and scaling
+        const scalableObjects = [this.continue_text, this.retry_text, this.exit_text];
+
+        // Perform raycasting
+        const intersects = raycaster.intersectObjects(scalableObjects);
+
+        if (intersects.length > 0) {
+            // Enlarge the button when the mouse is over it
+            const hoveredObject = intersects[0].object;
+            const scaleFactor = 1.2; // Adjust this value to control the scaling factor
+
+            if (hoveredObject.scale.x !== scaleFactor) {
+                hoveredObject.scale.set(scaleFactor, scaleFactor, scaleFactor);
+            }
+        } else {
+            // Reset the scale when the mouse is not over any button
+            for (const obj of scalableObjects) {
+                if (obj.scale.x !== 1) {
+                    obj.scale.set(1, 1, 1);
+                }
+            }
+        }
+    }
+
+    onMouseClick(event) {
+        // Calculate mouse coordinates in normalized device coordinates (NDC)
+        const mouse = {
+            x: (event.clientX / window.innerWidth) * 2 - 1,
+            y: -(event.clientY / window.innerHeight) * 2 + 1,
+        };
+
+        // Create a raycaster and check for intersections with your buttons
+        const raycaster = new Raycaster();
+        const vector = new Vector3(mouse.x, mouse.y, 0.5);
+        const camera = get_camera();
+        vector.unproject(camera);
+        raycaster.set(camera.position, vector.sub(camera.position).normalize());
+
+        // Define the objects you want to check for intersection
+        const clickableObjects = [this.continue_text, this.retry_text, this.exit_text];
+
+        // Perform raycasting
+        const intersects = raycaster.intersectObjects(clickableObjects);
+
+        if (intersects.length > 0) {
+            // Handle the click based on the intersected object
+            const clickedObject = intersects[0].object;
+            if (clickedObject === this.continue_text) {
+                // Handle continue button click
+                set_pause_click("continue");
+                // window.alert('Continue button clicked');
+            } else if (clickedObject === this.retry_text) {
+                // Handle retry button click
+                set_pause_click("retry");
+                // window.alert('Retry button clicked');
+            } else if (clickedObject === this.exit_text) {
+                // Handle exit button click
+                set_pause_click("exit");
+                // window.alert('Exit button clicked');
+            }
+        }
+    }
+
     update_in_pause_state() {
+        if (this.pause_state == false) {
+            this.pause_state = true;
+
+            for (let object of this.update_list) {
+                if (object.obj_type == 'launch_pad') {
+                    object.unrender_force();
+                }
+            }
+
+            for (let light of this.normal_light_list) {
+                this.remove(light);
+            }
+            for (let light of this.pause_light_list) {
+                this.add(light);
+            }
+
+            // Continue
+            this.continue_text = null;
+            const continueTexture = new TextureLoader().load('./objects/picture/pause-continue.png');
+            const continueMaterial = new MeshBasicMaterial({ map: continueTexture,
+                                                             alphaTest: 0.01,
+                                                             transparent: true});
+            const continueGeometry = new PlaneGeometry(1.0275, 0.21);
+            this.continue_text = new Mesh(continueGeometry, continueMaterial);
+            this.continue_text.position.set(1, 1.926, 1.043);
+            this.continue_text.rotation.set(-Math.PI / 6, 0, 0);
+            this.add(this.continue_text);
+
+            // Retry
+            this.retry_text = null;
+            const retryTexture = new TextureLoader().load('./objects/picture/pause-retry.png');
+            const retryMaterial = new MeshBasicMaterial({ map: retryTexture,
+                                                          alphaTest: 0.01,
+                                                          transparent: true});
+            const retryGeometry = new PlaneGeometry(1.0275, 0.21);
+            this.retry_text = new Mesh(retryGeometry, retryMaterial);
+            this.retry_text.position.set(1, 1.637, 1.21);
+            this.retry_text.rotation.set(-Math.PI / 6, 0, 0);
+            this.add(this.retry_text);
+
+            // Exit
+            this.exit_text = null;
+            const exitTexture = new TextureLoader().load('./objects/picture/pause-back.png');
+            const ecitMaterial = new MeshBasicMaterial({ map: exitTexture,
+                                                         alphaTest: 0.01,
+                                                         transparent: true});
+            const ecitGeometry = new PlaneGeometry(1.0275, 0.21);
+            this.exit_text = new Mesh(ecitGeometry, ecitMaterial);
+            this.exit_text.position.set(1, 1.348, 1.377);
+            this.exit_text.rotation.set(-Math.PI / 6, 0, 0);
+            this.add(this.exit_text);
+
+            const renderer = get_renderer();
+
+            this.onMouseMoveHandler = this.onMouseMove.bind(this);
+            renderer.domElement.addEventListener('mousemove', this.onMouseMoveHandler, false);
+
+            this.onMouseClickHandler = this.onMouseClick.bind(this);
+            renderer.domElement.addEventListener('click', this.onMouseClickHandler, false);
+        }
+    }
+
+    update_in_pause_state_old() {
         if (this.pause_state == false) {
             this.pause_state = true;
 
@@ -245,6 +389,9 @@ class PlayScene extends Scene {
 
     remove_pause_state() {
         this.pause_state = false;
+        const renderer = get_renderer();
+        renderer.domElement.removeEventListener('mousemove', this.onMouseMoveHandler);
+        renderer.domElement.removeEventListener('click', this.onMouseClickHandler, false);
         for (let light of this.pause_light_list) {
             this.remove(light);
         }
