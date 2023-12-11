@@ -2,26 +2,26 @@ import {Group} from 'three';
 // import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 
-class Tree extends Group{
+class Crate extends Group{
     constructor(parent, id, cfg) {
         super();
         this.parent = parent;
-        this.name = 'tree';
+        this.name = 'crate';
         this.obj_type = 'decoration';
         this.geo = 'none';
 
         this.cfg = cfg;
         this.dec_id = id;
         
-        this.tree = null;
+        this.crate = null;
         const loader = new GLTFLoader();
         loader.load( 
-            './objects/models/treePine.glb', 
+            './objects/models/crate.glb', 
             function ( glb ) {
                 glb.scene.position.set(cfg['x'], cfg['y'], cfg['z'])
-                this.tree = glb.scene.clone();
-                this.tree.scale.set(1.3, 1.3, 1.3);
-                this.parent.add(this.tree);
+                this.crate = glb.scene.clone();
+                this.crate.scale.set(1.3, 1.3, 1.3);
+                this.parent.add(this.crate);
             }.bind(this),
             undefined,
             function ( err ) {
@@ -36,4 +36,4 @@ class Tree extends Group{
 }
 
 
-export default Tree;
+export default Crate;

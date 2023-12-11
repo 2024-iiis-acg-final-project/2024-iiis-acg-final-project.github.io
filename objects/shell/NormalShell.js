@@ -1,5 +1,6 @@
 import {Group, Mesh, SphereGeometry, MeshStandardMaterial} from 'three';
 import {SphereWithPlane, SphereWithSphere, damage} from '../../pyhsis'
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 
 class NormalShell extends Group {
     constructor(parent, id) {
@@ -28,11 +29,27 @@ class NormalShell extends Group {
         this.mass = 10;
 
         this.shell_state = "wait"; // state should in ["wait", "attacking", "used"]
+        // const loader = new GLTFLoader();
+
+        // loader.load(
+        //     './objects/models/ball.gltf',
+        //     (gltf) => {
+        //         this.shell = gltf.scene.clone();
+        //         this.parent.add(this.shell);
+        //     },
+        //     undefined,
+        //     (err) => {
+        //         window.alert('An error happened.');
+        //     }
+        // );
+
 
         this.shell = new Mesh(new SphereGeometry(0.1, 32, 32), new MeshStandardMaterial({ color: 0x00ff00 }));
 
         this.parent.addToUpdateList(this);
         this.parent.add(this.shell);
+        
+        // this.parent.addToUpdateList(this);
         this.remove_flag = false;
     }
 
