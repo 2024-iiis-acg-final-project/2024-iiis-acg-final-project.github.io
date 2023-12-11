@@ -9,24 +9,30 @@ class Tree extends Group{
         this.name = 'tree';
         this.obj_type = 'decoration';
         this.geo = 'none';
-        this.cfg=cfg;
+
+        this.cfg = cfg;
+        this.dec_id = id;
+        
         this.tree = null;
         const loader = new GLTFLoader();
-        loader.load( './objects/models/tree.glb', function ( glb ) {
-            glb.scene.position.set(cfg['x'], cfg['y'], cfg['z'])
-            this.tree = glb.scene.clone();
-            this.tree.scale.set(100,100,100);
-            this.parent.add(this.tree);
-        }.bind(this),
-                undefined,
-                function ( err ) {
-                    window.alert( 'An error happened.' );
-                });
+        loader.load( 
+            './objects/models/tree.glb', 
+            function ( glb ) {
+                glb.scene.position.set(cfg['x'], cfg['y'], cfg['z'])
+                this.tree = glb.scene.clone();
+                this.tree.scale.set(1, 1, 1);
+                window.alert("IN:" + String(cfg['x']) + " " + String(cfg['y']) + " " + String(cfg['z']));
+                this.parent.add(this.tree);
+            }.bind(this),
+            undefined,
+            function ( err ) {
+                window.alert( 'An error happened.' );
+            });
+
         this.parent.addToUpdateList(this);
         this.no_collision = true;
     }
     update(){
-
     }
 }
 

@@ -52,7 +52,7 @@ class PlayScene extends Scene {
                 }
                 var deco_id = 0;
                 for (let deco_cfg of levelConfigs['decoration'] ) {
-                    load_deco(this, deco_cfg['id'], deco_id, deco_cfg);
+                    load_deco(this, deco_cfg['id'], deco_id, deco_cfg['cfg']);
                     deco_id += 1;
                 }
                 this.in_loading = false;
