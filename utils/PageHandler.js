@@ -8,9 +8,9 @@ function check_page_change(key) {
     if (page_info == 'select' && key == ' ') {
         return true;
     }
-    // if (page_info == 'play' && get_pause_state() == false && key == 'e') {
-    //     return true;
-    // }
+    if (page_info == 'play' && get_pause_state() == false && key == 'e') {
+        return true;
+    }
     // if (page_info == 'play' && get_pause_state() == true && key == 'r') {
     //     return true;
     // }
@@ -40,11 +40,10 @@ function change_global_info(key) {
         set_pause_state(false);
         return true;
     }
-    // if (page_info == 'play' && get_pause_state() == false && key == 'e') {
-    //     set_level(1);
-    //     set_pause_state(true);
-    //     return false;
-    // }
+    if (page_info == 'play' && get_pause_state() == false && key == 'e') {
+        set_pause_state(true);
+        return false;
+    }
     // if (page_info == 'play' && get_pause_state() == true && key == 'r') {
     //     set_pause_state(false);
     //     return true;
