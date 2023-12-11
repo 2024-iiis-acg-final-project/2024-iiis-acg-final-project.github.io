@@ -21,7 +21,6 @@ class Tree extends Group{
                 glb.scene.position.set(cfg['x'], cfg['y'], cfg['z'])
                 this.tree = glb.scene.clone();
                 this.tree.scale.set(1, 1, 1);
-                window.alert("IN:" + String(cfg['x']) + " " + String(cfg['y']) + " " + String(cfg['z']));
                 this.parent.add(this.tree);
             }.bind(this),
             undefined,
