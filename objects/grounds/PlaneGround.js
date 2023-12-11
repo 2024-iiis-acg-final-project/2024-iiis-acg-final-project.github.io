@@ -9,7 +9,7 @@ class PlaneGround extends Group {
         this.geo = 'plane';
         this.parent = parent;
 
-        const groundTexture = new TextureLoader().load('./objects/picture/grass.jpg');
+        const groundTexture = new TextureLoader().load('./objects/picture/grassnew1.png');
         groundTexture.wrapS = RepeatWrapping;
         groundTexture.wrapT = RepeatWrapping;
         const groundMaterial = new MeshStandardMaterial( { map: groundTexture, side: DoubleSide} );

@@ -33,19 +33,6 @@ class SelectScene extends THREE.Scene {
             function ( err ) {
                 window.alert( 'An error happened.' );
             });
-        
-            loader.load(
-                './objects/models/blockSnow.glb',
-                function(object) {
-                    const add_obj = object.scene.clone();
-                    add_obj.scale.set(0.9, 0.9, 0.1);
-                    this.select_cube = add_obj;
-                    this.set_level_1();
-                }.bind(this),
-                undefined,
-                function ( err ) {
-                    window.alert( 'An error happened.' );
-                });
 
         this.onLoadComplete = function () {
             for (let cube of this.cubes) {
@@ -54,8 +41,9 @@ class SelectScene extends THREE.Scene {
         };
 
         this.set_level_1 = function() {
-            this.remove(this.cubes[0]);
-            this.select_cube.position.set(-2, 1.2, 0);
+            this.remove(this.cubes[this.state.track]);
+            const pos = this.get_position();
+            this.select_cube.position.set(2 * pos.y - 2, 1.2 - pos.x * 1.5, 0);
             this.add(this.select_cube);
         };
 
@@ -105,6 +93,19 @@ class SelectScene extends THREE.Scene {
             track: 0
         };
         this.state.track = get_level() - 1;
+
+        loader.load(
+            './objects/models/blockSnow.glb',
+            function(object) {
+                const add_obj = object.scene.clone();
+                add_obj.scale.set(0.9, 0.9, 0.1);
+                this.select_cube = add_obj;
+                this.set_level_1();
+            }.bind(this),
+            undefined,
+            function ( err ) {
+                window.alert( 'An error happened.' );
+            });
 
         for (let cube of this.cubes) {
             this.add(cube);
