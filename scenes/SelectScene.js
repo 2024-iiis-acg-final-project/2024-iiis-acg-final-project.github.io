@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { FontLoader } from 'three/addons/loaders/FontLoader.js';
 import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
-import { set_level } from '../utils';
+import { get_level, set_level } from '../utils';
 
 class SelectScene extends THREE.Scene {
     constructor() {
@@ -81,7 +81,7 @@ class SelectScene extends THREE.Scene {
         this.state = {
             track: 0
         };
-
+        this.state.track=get_level()-1;
         this.cubes[this.state.track].material=material;
 
         for (let cube of this.cubes) {
