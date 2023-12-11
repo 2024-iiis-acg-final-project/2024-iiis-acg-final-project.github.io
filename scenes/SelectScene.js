@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { FontLoader } from 'three/addons/loaders/FontLoader.js';
 import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
 import { get_level, set_level } from '../utils';
+import { TextureLoader, PlaneGeometry, MeshBasicMaterial, Mesh } from 'three';
 
 class SelectScene extends THREE.Scene {
     constructor() {
@@ -20,58 +21,23 @@ class SelectScene extends THREE.Scene {
             }
         }
 
-        let title_mesh;
-        let text_mesh;
+        const titleTexture = new TextureLoader().load('./objects/picture/select-level.png');
+        const titleMaterial = new MeshBasicMaterial({ map: titleTexture,
+                                                      alphaTest: 0,
+                                                      transparent: true});
+        const titleGeometry = new PlaneGeometry(8.13, 1.2);
+        this.title = new Mesh(titleGeometry, titleMaterial);
+        this.title.position.set(0, 3, 0);
+        this.add(this.title);
 
-        var loader = new FontLoader();
-
-        loader.load( './style/font.json', function ( font ) {
-            const title_geometry = new TextGeometry( 'Select Level', {
-                font: font,
-                size: 60,
-                height: 5,
-                curveSegments: 12,
-                bevelEnabled: true,
-                bevelThickness: 1,
-                bevelSize: 1,
-                bevelSegments: 2
-            } );
-
-            const text_geometry = new TextGeometry( 'Press up, down, left, right keys to move', {
-                font: font,
-                size: 60,
-                height: 5,
-                curveSegments: 12,
-                bevelEnabled: true,
-                bevelThickness: 1,
-                bevelSize: 1,
-                bevelSegments: 2
-            } );
-
-            title_geometry.computeBoundingBox();
-            const centerOffset = - 0.5 * ( title_geometry.boundingBox.max.x - title_geometry.boundingBox.min.x );
-
-            const title_material = new THREE.MeshStandardMaterial( { color: 0xffffff } );
-            title_mesh = new THREE.Mesh(title_geometry, title_material);
-            
-            title_mesh.position.set(centerOffset, 100, -300);
-            title_mesh.rotation.set(0, Math.PI * 2, 0);
-
-            this.title_mesh = title_mesh;
-            this.add(this.title_mesh);
-
-            text_geometry.computeBoundingBox();
-            const text_material = new THREE.MeshStandardMaterial( { color: 0xf7dd19 } );
-            text_mesh = new THREE.Mesh(text_geometry, title_material);
-
-            const text_centerOffset = - 0.5 * ( text_geometry.boundingBox.max.x - text_geometry.boundingBox.min.x );
-            text_mesh.position.set(text_centerOffset, -500, -1000);
-            text_mesh.rotation.set(0, Math.PI * 2, 0);
-
-            this.text_mesh = text_mesh;
-            this.add(this.text_mesh);
-
-        }.bind(this) );
+        const pressTexture = new TextureLoader().load('./objects/picture/press2.png');
+        const pressMaterial = new MeshBasicMaterial({ map: pressTexture,
+                                                      alphaTest: 0,
+                                                      transparent: true});
+        const pressGeometry = new PlaneGeometry(6.19, 0.63);
+        this.press = new Mesh(pressGeometry, pressMaterial);
+        this.press.position.set(0, -2.5, 0);
+        this.add(this.press);
 
         this.add( new THREE.AmbientLight( 0x777777 ) );
         const directionalLight = new THREE.DirectionalLight( 0xffffff, 1 );
@@ -88,7 +54,13 @@ class SelectScene extends THREE.Scene {
             this.add(cube);
         }
 
-        // window.alert(String(this.state.track));
+        const bgTexture = new TextureLoader().load('./objects/picture/background2.png');
+
+        const bgGeometry = new PlaneGeometry(1280, 720);
+        const bgMaterial = new MeshBasicMaterial({ map: bgTexture, side: THREE.DoubleSide });
+        this.backgroundMesh = new Mesh(bgGeometry, bgMaterial);
+        this.backgroundMesh.position.set(0, 0, -250); // Adjust the Z position to be behind other objects
+        this.add(this.backgroundMesh);
         
     }
 
@@ -97,6 +69,17 @@ class SelectScene extends THREE.Scene {
             this.remove(cube);
             this.add(cube);
         }
+
+        const elapsedTime = Date.now() * 0.001; // Convert to seconds
+
+        // Calculate movement based on elapsed time
+        const speedX = 0.2;
+        const speedY = 0.5;
+        const movementX = Math.sin(elapsedTime * speedX);
+        const movementY = Math.cos(elapsedTime * speedY);
+
+        // Update background position
+        this.backgroundMesh.position.set(movementX * 200, movementY * 100, -250);
     }
 
     update_info(direction) {

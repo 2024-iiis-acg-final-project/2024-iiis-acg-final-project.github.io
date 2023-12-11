@@ -1,4 +1,5 @@
-import { Group, PlaneGeometry, Mesh, MeshPhongMaterial, MeshStandardMaterial, BoxGeometry } from "three";
+import { DoubleSide, MeshBasicMaterial, RepeatWrapping } from "three";
+import { Group, PlaneGeometry, Mesh, MeshPhongMaterial, MeshStandardMaterial, TextureLoader } from "three";
 
 class PlaneGround extends Group {
     constructor(parent){
@@ -8,7 +9,13 @@ class PlaneGround extends Group {
         this.geo = 'plane';
         this.parent = parent;
 
-        this.ground = new Mesh(new PlaneGeometry(100, 100, 1, 1), new MeshPhongMaterial( { color: 0xa0adaf, shininess: 150 } ))
+        const groundTexture = new TextureLoader().load('./objects/picture/grass.jpg');
+        groundTexture.wrapS = RepeatWrapping;
+        groundTexture.wrapT = RepeatWrapping;
+        const groundMaterial = new MeshStandardMaterial( { map: groundTexture, side: DoubleSide} );
+        groundMaterial.map.repeat.set(20, 20);
+
+        this.ground = new Mesh(new PlaneGeometry(100, 100, 1, 1), groundMaterial);
         this.ground.rotation.set(- Math.PI / 2, 0, 0);
         this.ground.position.set(0, -0.5, 0);
         this.ground.receiveShadow = true;

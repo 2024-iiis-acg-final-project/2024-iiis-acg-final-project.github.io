@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { FontLoader } from 'three/addons/loaders/FontLoader.js';
 import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
+import { TextureLoader, PlaneGeometry, MeshBasicMaterial, Mesh } from 'three';
 
 class EndScene extends THREE.Scene {
     constructor(success) {
@@ -50,12 +51,31 @@ class EndScene extends THREE.Scene {
         const directionalLight = new THREE.DirectionalLight( 0xffffff, 1 );
         directionalLight.position.set(100, 100, 100);
         this.add( directionalLight );
+
+        const bgTexture = new TextureLoader().load('./objects/picture/background2.png');
+
+        const bgGeometry = new PlaneGeometry(1280, 720);
+        const bgMaterial = new MeshBasicMaterial({ map: bgTexture, side: THREE.DoubleSide });
+        this.backgroundMesh = new Mesh(bgGeometry, bgMaterial);
+        this.backgroundMesh.position.set(0, 0, -250); // Adjust the Z position to be behind other objects
+        this.add(this.backgroundMesh);
         
     }
 
     update() {
         this.cube.rotation.x += 0.01;
         this.cube.rotation.y += 0.01;
+
+        const elapsedTime = Date.now() * 0.001; // Convert to seconds
+
+        // Calculate movement based on elapsed time
+        const speedX = 0.2;
+        const speedY = 0.5;
+        const movementX = Math.sin(elapsedTime * speedX);
+        const movementY = Math.cos(elapsedTime * speedY);
+
+        // Update background position
+        this.backgroundMesh.position.set(movementX * 200, movementY * 100, -250);
     }
 }
 
