@@ -9,6 +9,7 @@ import { load_enemy } from '../objects/enemy';
 import { load_shell } from '../objects/shell';
 import { load_wall } from '../objects/wall';
 import { load_tool } from '../objects/tool';
+import { load_deco } from '../objects/decoration';
 import { get_camera, get_renderer } from '../main';
 import { set_pause_click } from '../utils';
 
@@ -48,6 +49,11 @@ class PlayScene extends Scene {
                 for (let tool_cfg of levelConfigs['tool'] ) {
                     load_tool(this, tool_cfg, tool_id);
                     tool_id += 1;
+                }
+                var deco_id = 0;
+                for (let deco_cfg of levelConfigs['decoration'] ) {
+                    load_deco(this, deco_cfg['id'], deco_id, deco_cfg);
+                    deco_id += 1;
                 }
                 this.in_loading = false;
             })
