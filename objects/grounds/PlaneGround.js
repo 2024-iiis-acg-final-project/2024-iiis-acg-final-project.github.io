@@ -62,10 +62,10 @@ class PlaneGround extends Group {
         if (x1 > x2) {
             var t = x1; x1 = x2; x2 = t;
         }
-        if (x2 < 1e-4) {
+        if (x2 < 1e-2) {
             return 2;
         }
-        if (x1 < -1e-4) {
+        if (x1 < -1e-2) {
             return x2;
         }
         return x1;
