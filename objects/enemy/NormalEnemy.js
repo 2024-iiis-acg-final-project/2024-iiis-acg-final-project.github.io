@@ -1,4 +1,4 @@
-import {Group, MeshStandardMaterial, SphereGeometry, Mesh} from 'three';
+import {Group, MeshStandardMaterial, SphereGeometry, Mesh, TextureLoader} from 'three';
 import {SphereWithPlane, SphereWithSphere, damage} from '../../pyhsis'
 
 class NormalEnemy extends Group{
@@ -8,8 +8,12 @@ class NormalEnemy extends Group{
         this.name = 'normal_enemy';
         this.obj_type = 'enemy';
         this.geo = 'sphere';
+        
+        const debug_texture = new TextureLoader().load('./objects/picture/wall.jpg');
+        const debug_material = new MeshStandardMaterial({map: debug_texture});
+        this.enemy = new Mesh(new SphereGeometry(0.3, 32, 32), debug_material);
 
-        this.enemy = new Mesh(new SphereGeometry(0.3, 32, 32), new MeshStandardMaterial({ color: 0x0000ff }));
+        // this.enemy = new Mesh(new SphereGeometry(0.3, 32, 32), new MeshStandardMaterial({ color: 0x0000ff }));
         this.enemy.position.set(x, y, z);
 
         this.blood = 100;
@@ -42,7 +46,7 @@ class NormalEnemy extends Group{
                 this.parent.add(this.enemy);
             }
 
-            this.enemy.material = new MeshStandardMaterial({color: 0x0000ff + Math.floor((100 - this.blood) / 100 * 0xff) * (0x10000)});
+            // this.enemy.material = new MeshStandardMaterial({color: 0x0000ff + Math.floor((100 - this.blood) / 100 * 0xff) * (0x10000)});
 
             if (this.blood > 0) {
                 this.move_step();
