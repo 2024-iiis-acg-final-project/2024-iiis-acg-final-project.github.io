@@ -79,10 +79,6 @@
             }
         }
     ],
-<<<<<<< HEAD
-    "decoration": [],
-    "tool": []
-=======
     "tool": [],
     "decoration": [
         {
@@ -103,5 +99,4 @@
         }
 
     ]
->>>>>>> origin/main
 }

@@ -532,14 +532,29 @@ class PlayScene extends Scene {
         // if (this.debug_cnt == 1000) {
         //     this.debug_cnt = 0;
         //     var alive_cnt = 0;
+        //     var ret_string = "";
         //     for (let object of this.update_list) {
         //         if (object.obj_type == 'enemy') {
         //             if(object.blood > 0) {
         //                 alive_cnt += 1;
+        //                 ret_string += String(alive_cnt) + " : ";
+        //                 if (object.remove_flag == true) {
+        //                     ret_string += "true ";
+        //                 }
+        //                 else {
+        //                     ret_string += "false ";
+        //                 }
+        //                 ret_string += "x: " + String(object.get_position().x.toFixed(3)) + 
+        //                             " y: " + String(object.get_position().y.toFixed(3)) + 
+        //                             " z: " + String(object.get_position().z.toFixed(3)) + "\n";
+        //                 ret_string += "rx: " + String(object.enemy.rotation.x.toFixed(3)) + 
+        //                             " ry: " + String(object.enemy.rotation.y.toFixed(3)) + 
+        //                             " rz: " + String(object.enemy.rotation.z.toFixed(3)) + "\n";
+        //                 this.add(object.enemy);
         //             }
         //         }
         //     }
-        //     window.alert("Alive:" + String(alive_cnt));
+        //     window.alert(ret_string);
         // }
     }
 

@@ -36,10 +36,14 @@ class BigEnemy extends Group{
     }
 
     update() {
-        if(this.remove_flag == false) {
-            this.remove_flag = true;
-            this.parent.remove(this.enemy);
+        if (this.blood > 0 && this.remove_flag == true) {
+            this.remove_flag = false;
+            this.parent.add(this.enemy);
         }
+        // if(this.remove_flag == false) {
+        //     this.remove_flag = true;
+        //     this.parent.remove(this.enemy);
+        // }
 
         this.enemy.material = new MeshStandardMaterial({color: 0x0000ff + Math.floor((500 - this.blood) / 500 * 0xff) * (0x10000)});
 
@@ -47,10 +51,14 @@ class BigEnemy extends Group{
             this.move_step();
             this.apply_g();
             this.decay_velocity();
-            this.remove_flag = false;
-            this.parent.add(this.enemy);
+            // this.remove_flag = false;
+            // this.parent.add(this.enemy);
         }
         else {
+            if (this.remove_flag == false) {
+                this.remove_flag = true;
+                this.parent.remove(this.enemy);
+            }
             this.no_collision = true;
         }
     }

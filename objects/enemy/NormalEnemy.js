@@ -36,22 +36,28 @@ class NormalEnemy extends Group{
     }
 
     update() {
-        if(this.remove_flag == false) {
-            this.remove_flag = true;
-            this.parent.remove(this.enemy);
-        }
+        try {
+            if (this.blood > 0 && this.remove_flag == true) {
+                this.remove_flag = false;
+                this.parent.add(this.enemy);
+            }
 
-        this.enemy.material = new MeshStandardMaterial({color: 0x0000ff + Math.floor((100 - this.blood) / 100 * 0xff) * (0x10000)});
+            this.enemy.material = new MeshStandardMaterial({color: 0x0000ff + Math.floor((100 - this.blood) / 100 * 0xff) * (0x10000)});
 
-        if (this.blood > 0) {
-            this.move_step();
-            this.apply_g();
-            this.decay_velocity();
-            this.remove_flag = false;
-            this.parent.add(this.enemy);
-        }
-        else {
-            this.no_collision = true;
+            if (this.blood > 0) {
+                this.move_step();
+                this.apply_g();
+                this.decay_velocity();
+            }
+            else {
+                if (this.remove_flag == false) {
+                    this.remove_flag = true;
+                    this.parent.remove(this.enemy);
+                }
+                this.no_collision = true;
+            }
+        } catch (error) {
+            window.alert("Error:", error);
         }
     }
 

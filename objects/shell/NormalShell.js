@@ -348,10 +348,14 @@ class NormalShell extends Group {
     }
 
     update(){
-        if(this.remove_flag == false) {
-            this.remove_flag = true;
-            this.parent.remove(this.shell);
+        if (this.shell_state != 'used' && this.remove_flag == true) {
+            this.remove_flag = false;
+            this.parent.add(this.shell);
         }
+        // if(this.remove_flag == false) {
+        //     this.remove_flag = true;
+        //     this.parent.remove(this.shell);
+        // }
 
         if (this.shell_state == 'attacking') {
             this.move_step();
@@ -359,12 +363,12 @@ class NormalShell extends Group {
             this.decay_velocity();
         }
 
-        if (this.shell_state != 'used') {
-            this.remove_flag = false;
-            this.parent.add(this.shell);
-        }
-        else {
+        if (this.shell_state == 'used') {
             this.no_collision = true;
+            if (this.remove_flag == false) {
+                this.remove_flag = true;
+                this.parent.remove(this.shell);
+            }
         }
     }
 }

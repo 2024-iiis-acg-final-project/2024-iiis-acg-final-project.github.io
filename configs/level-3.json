@@ -56,13 +56,8 @@
             }
         }
     ],
-<<<<<<< HEAD
-    "decoration": [],
-    "tool": [
-=======
     "tool": [],
     "decoration": [
->>>>>>> origin/main
         {
             "id": 0,
             "cfg": {
