@@ -27,27 +27,29 @@ class NormalShell extends Group {
         this.small_velocity_period = 0
 
         this.mass = 10;
+        this.shell = null;
 
         this.shell_state = "wait"; // state should in ["wait", "attacking", "used"]
-        // const loader = new GLTFLoader();
+        const loader = new GLTFLoader();
 
-        // loader.load(
-        //     './objects/models/ball.gltf',
-        //     (gltf) => {
-        //         this.shell = gltf.scene.clone();
-        //         this.parent.add(this.shell);
-        //     },
-        //     undefined,
-        //     (err) => {
-        //         window.alert('An error happened.');
-        //     }
-        // );
+        loader.load(
+            './objects/models/ball.glb',
+            function ( glb ) {
+                this.shell = glb.scene.clone();
+                this.shell.scale.set(0.05, 0.05, 0.05);
+                this.parent.addToUpdateList(this);
+                this.parent.add(this.shell);
+            }.bind(this),
+            undefined,
+            function ( err ) {
+                window.alert( 'An error happened.' );
+            });
 
 
-        this.shell = new Mesh(new SphereGeometry(0.1, 32, 32), new MeshStandardMaterial({ color: 0x00ff00 }));
+        // this.shell = new Mesh(new SphereGeometry(0.1, 32, 32), new MeshStandardMaterial({ color: 0x00ff00 }));
 
-        this.parent.addToUpdateList(this);
-        this.parent.add(this.shell);
+        // this.parent.addToUpdateList(this);
+        // this.parent.add(this.shell);
         
         // this.parent.addToUpdateList(this);
         this.remove_flag = false;

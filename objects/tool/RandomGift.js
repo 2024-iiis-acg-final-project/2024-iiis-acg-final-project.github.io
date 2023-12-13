@@ -1,5 +1,6 @@
 import {Group, Mesh, SphereGeometry, MeshStandardMaterial, BoxGeometry} from 'three';
 import { load_shell } from '../shell';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 
 class RandomGift extends Group {
     constructor(parent, id, x, y, z) {
@@ -10,18 +11,34 @@ class RandomGift extends Group {
         this.obj_type = "tool";
         this.geo = 'sphere';
         this.tool_id = id;
+        this.tool = null;
+        const loader = new GLTFLoader();
+        loader.load( 
+            './objects/models/key.glb', 
+            function ( glb ) {
+                glb.scene.position.set(x, y, z)
+                this.tool = glb.scene.clone();
+                this.tool.scale.set(1, 1, 1);
+                this.tool.rotation.set(Math.PI / 4, 0, 0);
+                this.parent.addToUpdateList(this);
+                this.parent.add(this.tool);
+            }.bind(this),
+            undefined,
+            function ( err ) {
+                window.alert( 'An error happened.' );
+            });
 
-        this.tool = new Mesh(new BoxGeometry(0.2, 0.2, 0.2), new MeshStandardMaterial({ color: 0x00ffff }));
-        this.tool.position.set(x, y, z);
-        this.tool.rotation.set(Math.PI / 4, 0, Math.PI / 4);
+        // this.tool = new Mesh(new BoxGeometry(0.2, 0.2, 0.2), new MeshStandardMaterial({ color: 0x00ffff }));
+        // this.tool.position.set(x, y, z);
+        // this.tool.rotation.set(Math.PI / 4, 0, Math.PI / 4);
 
         this.radius = 0.2;
         this.used = false;
         this.remove_flag = false;
         this.no_collision = true;
         
-        this.parent.addToUpdateList(this);
-        this.parent.add(this.shell);
+        // this.parent.addToUpdateList(this);
+        // this.parent.add(this.tool);
     }
 
     get_position() {
