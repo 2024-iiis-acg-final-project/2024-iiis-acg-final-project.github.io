@@ -2,50 +2,33 @@ import * as THREE from 'three';
 import { FontLoader } from 'three/addons/loaders/FontLoader.js';
 import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
 import { TextureLoader, PlaneGeometry, MeshBasicMaterial, Mesh } from 'three';
+import { get_camera, get_renderer } from '../main';
+import { set_end_click } from '../utils';
 
 class EndScene extends THREE.Scene {
     constructor(success) {
         super();
-        const geometry = new THREE.BoxGeometry( 1, 1, 1 );
-        const material = new THREE.MeshStandardMaterial( { color: 0x00ff00 } );
-        let cube = new THREE.Mesh( geometry, material );
-        cube.position.set(0, 2, 0);
-        this.cube = cube
-        this.add( this.cube );
 
-        let title_mesh;
-
-        this.success = success;
-
-        var loader = new FontLoader();
-
-        loader.load( './style/font.json', function ( font ) {
-            var textString = "You Win!";
-            if (this.success == false) {
-                textString = "You Loss!";
-            }
-            const title_geometry = new TextGeometry( textString, {
-                font: font,
-                size: 70,
-                height: 20,
-                curveSegments: 4,
-                bevelEnabled: true,
-                bevelThickness: 2,
-                bevelSize: 1.5
-            } );
-
-            title_geometry.computeBoundingBox();
-            const centerOffset = - 0.5 * ( title_geometry.boundingBox.max.x - title_geometry.boundingBox.min.x );
-
-            const title_material = new THREE.MeshStandardMaterial( { color: 0xffffff } );
-            title_mesh = new THREE.Mesh(title_geometry, title_material);
-            
-            title_mesh.position.set(centerOffset, -30, -500);
-            title_mesh.rotation.set(0, Math.PI * 2, 0);
-
-            this.title_mesh = title_mesh;
-            this.add(this.title_mesh);
-        }.bind(this) );
+        if (success == true) {
+            const titleTexture = new TextureLoader().load('./objects/picture/win.png');
+            const titleMaterial = new MeshBasicMaterial({ map: titleTexture,
+                                                        alphaTest: 0,
+                                                        transparent: true});
+            const titleGeometry = new PlaneGeometry(5.41, 1.68);
+            this.title = new Mesh(titleGeometry, titleMaterial);
+            this.title.position.set(0, 2, 0);
+            this.add(this.title);
+        }
+        else {
+            const titleTexture = new TextureLoader().load('./objects/picture/loss.png');
+            const titleMaterial = new MeshBasicMaterial({ map: titleTexture,
+                                                        alphaTest: 0,
+                                                        transparent: true});
+            const titleGeometry = new PlaneGeometry(5.82, 1.65);
+            this.title = new Mesh(titleGeometry, titleMaterial);
+            this.title.position.set(0, 2, 0);
+            this.add(this.title);
+        }
 
         this.add( new THREE.AmbientLight( 0x777777 ) );
         const directionalLight = new THREE.DirectionalLight( 0xffffff, 1 );
@@ -60,12 +43,103 @@ class EndScene extends THREE.Scene {
         this.backgroundMesh.position.set(0, 0, -250); // Adjust the Z position to be behind other objects
         this.add(this.backgroundMesh);
         
+        // Retry
+        this.retry_text = null;
+        const retryTexture = new TextureLoader().load('./objects/picture/pause-retry.png');
+        const retryMaterial = new MeshBasicMaterial({ map: retryTexture,
+                                                      alphaTest: 0.01,
+                                                      transparent: true});
+        const retryGeometry = new PlaneGeometry(1.0275, 0.21);
+        this.retry_text = new Mesh(retryGeometry, retryMaterial);
+        this.retry_text.position.set(-0.8, -0.2, 3.5);
+        this.add(this.retry_text);
+
+        // Exit
+        this.exit_text = null;
+        const exitTexture = new TextureLoader().load('./objects/picture/pause-back.png');
+        const ecitMaterial = new MeshBasicMaterial({ map: exitTexture,
+                                                     alphaTest: 0.01,
+                                                     transparent: true});
+        const ecitGeometry = new PlaneGeometry(1.0275, 0.21);
+        this.exit_text = new Mesh(ecitGeometry, ecitMaterial);
+        this.exit_text.position.set(0.8, -0.2, 3.5);
+        this.add(this.exit_text);
+
+        const renderer = get_renderer();
+
+        this.onMouseMoveHandler = this.onMouseMove.bind(this);
+        renderer.domElement.addEventListener('mousemove', this.onMouseMoveHandler, false);
+
+        this.onMouseClickHandler = this.onMouseClick.bind(this);
+        renderer.domElement.addEventListener('click', this.onMouseClickHandler, false);
+
+    }
+
+    onMouseMove(event) {
+        const mouse = {
+            x: (event.clientX / window.innerWidth) * 2 - 1,
+            y: -(event.clientY / window.innerHeight) * 2 + 1,
+        };
+
+        const raycaster = new THREE.Raycaster();
+        const vector = new THREE.Vector3(mouse.x, mouse.y, 0.5);
+        const camera = get_camera();
+        vector.unproject(camera);
+        raycaster.set(camera.position, vector.sub(camera.position).normalize());
+
+        const scalableObjects = [this.retry_text, this.exit_text];
+
+        const intersects = raycaster.intersectObjects(scalableObjects);
+
+        if (intersects.length > 0) {
+            const hoveredObject = intersects[0].object;
+            const scaleFactor = 1.2; // Adjust this value to control the scaling factor
+
+            if (hoveredObject.scale.x !== scaleFactor) {
+                hoveredObject.scale.set(scaleFactor, scaleFactor, scaleFactor);
+            }
+        } else {
+            for (const obj of scalableObjects) {
+                if (obj.scale.x !== 1) {
+                    obj.scale.set(1, 1, 1);
+                }
+            }
+        }
+    }
+
+    onMouseClick(event) {
+        const mouse = {
+            x: (event.clientX / window.innerWidth) * 2 - 1,
+            y: -(event.clientY / window.innerHeight) * 2 + 1,
+        };
+
+        const raycaster = new THREE.Raycaster();
+        const vector = new THREE.Vector3(mouse.x, mouse.y, 0.5);
+        const camera = get_camera();
+        vector.unproject(camera);
+        raycaster.set(camera.position, vector.sub(camera.position).normalize());
+
+        const clickableObjects = [this.retry_text, this.exit_text];
+
+        const intersects = raycaster.intersectObjects(clickableObjects);
+
+        if (intersects.length > 0) {
+            const clickedObject = intersects[0].object;
+            if (clickedObject === this.retry_text) {
+                set_end_click("retry");
+            } else if (clickedObject === this.exit_text) {
+                set_end_click("exit");
+            }
+        }
+    }
+
+    destructor(){
+        const renderer = get_renderer();
+        renderer.domElement.removeEventListener('mousemove', this.onMouseMoveHandler);
+        renderer.domElement.removeEventListener('click', this.onMouseClickHandler, false);
     }
 
     update() {
-        this.cube.rotation.x += 0.01;
-        this.cube.rotation.y += 0.01;
-
         const elapsedTime = Date.now() * 0.001; // Convert to seconds
 
         // Calculate movement based on elapsed time

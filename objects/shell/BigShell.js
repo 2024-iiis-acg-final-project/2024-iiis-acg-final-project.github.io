@@ -358,14 +358,17 @@ class BigShell extends Group {
             if (this.subshell_created == false) {
                 this.subshell_created = true;
                 var sub_shell_num = Math.floor(Math.random() * 3) + 3;
-                for (let i = 0; i < sub_shell_num; i++) {
+                for (let i = 0; i < 16; i++) { // At most try 16 times
+                    if (sub_shell_num == 0) {
+                        break;
+                    }
                     let u = Math.random(), v = Math.random();
                     let theta = 2 * Math.PI * u, phi = Math.acos(2 * v - 1);
-                    let v_norm = Math.random() / 1.5 + 0.75;
+                    let v_norm = Math.random() / 2 + 0.75;
                     var new_velocity = {
-                        x: Math.sin(phi) * Math.cos(theta) * v_norm,
-                        y: Math.sin(phi) * Math.sin(theta) * v_norm,
-                        z: Math.cos(phi) * v_norm
+                        x: Math.sin(phi) * Math.cos(theta) * v_norm ,
+                        y: Math.sin(phi) * Math.sin(theta) * v_norm ,
+                        z: Math.cos(phi) * v_norm 
                     }
                     var new_position = {
                         x: this.get_position().x + new_velocity.x * this.radius,
@@ -375,8 +378,27 @@ class BigShell extends Group {
                     new_velocity.x = new_velocity.x * 0.1 + this.velocity.x;
                     new_velocity.y = new_velocity.y * 0.1 + this.velocity.y;
                     new_velocity.z = new_velocity.z * 0.1 + this.velocity.z;
+
+                    // If the new shell has intersection with other object, this generation will be consider as failure
+                    var fail_flag = false;
+                    for (let object of this.parent.update_list){
+                        if (object.no_collision == true) {
+                            continue;
+                        }
+                        if (object.obj_type != 'plane') {
+                            continue;
+                        }
+                        if (object.is_intersect(new_position, 0.075)) {
+                            fail_flag = true;
+                            break;
+                        }
+                    }
+                    if(fail_flag == true) {
+                        continue;
+                    }
                     const sub_shell = new SubBigShell(this.parent, this.parent.final_shell_id, new_position, new_velocity);
                     this.parent.final_shell_id += 1;
+                    sub_shell_num --;
                 }
             }
         }

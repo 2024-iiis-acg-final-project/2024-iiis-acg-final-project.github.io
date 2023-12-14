@@ -7,7 +7,7 @@
 import * as THREE from 'three';
 import { StartScene } from './scenes';
 import WebGL from 'three/addons/capabilities/WebGL.js';
-import { build_new_scene, change_global_info, check_page_change, get_page_info, get_pause_state, Lock, set_page_info, set_pause_state, get_select_direction, set_success_flag, get_pause_click, set_pause_click} from './utils';
+import { build_new_scene, change_global_info, check_page_change, get_page_info, get_pause_state, Lock, set_page_info, set_pause_state, get_select_direction, set_success_flag, get_pause_click, set_pause_click, get_end_click, set_end_click} from './utils';
 
 var scene = new StartScene();
 
@@ -54,6 +54,21 @@ const onAnimationFrameHandler = (timeStamp) => {
 			set_page_info('select');
 			set_pause_click("none");
 			scene.reset_camera(camera);
+			scene = build_new_scene();
+		}
+	}
+	if (get_page_info() == 'end') {
+		const end_click = get_end_click();
+		if (end_click == 'retry') {
+			set_pause_state(false);
+        	set_page_info('play');
+			set_end_click('none');
+			scene = build_new_scene();
+		}
+		else if (end_click == 'exit') {
+			set_pause_state(false);
+        	set_page_info('select');
+			set_end_click('none');
 			scene = build_new_scene();
 		}
 	}

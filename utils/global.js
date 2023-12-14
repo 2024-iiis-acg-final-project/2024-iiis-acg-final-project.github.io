@@ -2,6 +2,7 @@ import { LessCompare } from "three";
 
 let PAGE_STATE = "start";
 let PAUSE_CLICK = "none";
+let END_CLICK = "none";
 let LEVEL = 1;
 let ON_PAUSE = false;
 let SUCCESS_FLAG = false;
@@ -26,6 +27,10 @@ function get_pause_click() {
     return PAUSE_CLICK;
 }
 
+function get_end_click() {
+    return END_CLICK;
+}
+
 function set_page_info(page_state) {
     PAGE_STATE = page_state;
 }
@@ -44,6 +49,10 @@ function set_success_flag(success) {
 
 function set_pause_click(click) {
     PAUSE_CLICK = click;
+}
+
+function set_end_click(click) {
+    END_CLICK = click;
 }
 
 function get_select_direction(key){
@@ -66,4 +75,4 @@ function get_select_direction(key){
 
 export {get_page_info, set_page_info, get_level, set_level, get_pause_state, 
         set_pause_state, get_select_direction, set_success_flag, get_success_flag,
-        get_pause_click, set_pause_click}
+        get_pause_click, set_pause_click, get_end_click, set_end_click}
