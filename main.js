@@ -22,6 +22,30 @@ camera.position.z = 5;
 const ReadInfoLock = new Lock();
 const WriteInfoLock = new Lock();
 
+var listener = new THREE.AudioListener();
+
+var sound = new THREE.Audio( listener );
+var back_music = new THREE.Audio( listener );
+
+var audioLoader = new THREE.AudioLoader();
+audioLoader.load( './audio/key-press.wav', function( buffer ) {
+	sound.setBuffer( buffer );
+	sound.setLoop( false );
+	sound.setVolume( 0.5 );
+	sound.pause();
+});
+const press_sound = sound;
+var hasMusicStarted = false;
+var back_music_finish_load = false;
+
+audioLoader.load( './audio/angry-bird.mp3', function( buffer ) {
+	back_music.setBuffer( buffer );
+	back_music.setLoop( true );
+	back_music.setVolume( 0.5 );
+	back_music.play();
+	back_music_finish_load = true;
+});
+
 function get_camera() {
 	return camera;
 }
@@ -32,6 +56,10 @@ function get_renderer() {
 
 // Render loop
 const onAnimationFrameHandler = (timeStamp) => {
+	// if (hasMusicStarted == false && back_music_finish_load == true) {
+	// 	hasMusicStarted = true;
+	// 	back_music.play();
+	// }
 	WriteInfoLock.acquire();
 	if (!get_pause_state() || get_page_info() != 'play') {
 		scene.update();
@@ -55,6 +83,7 @@ const onAnimationFrameHandler = (timeStamp) => {
 			set_pause_click("none");
 			scene.reset_camera(camera);
 			scene = build_new_scene();
+			back_music.play();
 		}
 	}
 	if (get_page_info() == 'end') {
@@ -70,6 +99,7 @@ const onAnimationFrameHandler = (timeStamp) => {
         	set_page_info('select');
 			set_end_click('none');
 			scene = build_new_scene();
+			back_music.play();
 		}
 	}
 	if (get_page_info() == 'play') {
@@ -104,11 +134,16 @@ window.addEventListener('keydown', event => {
 	const key = event.key;
 	ReadInfoLock.acquire();
 	if (check_page_change(key)) {
+		press_sound.stop();
+		press_sound.play();
 		WriteInfoLock.acquire();
 		const before_page_info = get_page_info();
 		if (change_global_info(key)) {
 			if (before_page_info == 'play') {
 				scene.reset_camera(camera);
+			}
+			else if(before_page_info == 'select' && get_page_info() == 'play') {
+				back_music.stop();
 			}
 			scene = build_new_scene();
 		}

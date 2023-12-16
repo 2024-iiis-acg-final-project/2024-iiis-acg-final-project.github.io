@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { FontLoader } from 'three/addons/loaders/FontLoader.js';
 import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
-import { TextureLoader, PlaneGeometry, MeshBasicMaterial, Mesh } from 'three';
+import { TextureLoader, PlaneGeometry, MeshBasicMaterial, Mesh, AudioLoader, AudioListener, Audio } from 'three';
 import { get_camera, get_renderer } from '../main';
 import { set_end_click } from '../utils';
 
@@ -73,6 +73,43 @@ class EndScene extends THREE.Scene {
         this.onMouseClickHandler = this.onMouseClick.bind(this);
         renderer.domElement.addEventListener('click', this.onMouseClickHandler, false);
 
+        var listener = new AudioListener();
+
+        var switchSound = new Audio(listener);
+        var playSound = new Audio(listener);
+        var quitSound = new Audio(listener);
+
+        var audioLoader = new AudioLoader();
+
+        audioLoader.load('./audio/switch.wav', function (buffer) {
+            switchSound.setBuffer(buffer);
+            switchSound.setLoop(false);
+            switchSound.setVolume(0.5);
+            switchSound.pause();
+        });
+
+        this.switch_sound = switchSound;
+
+        audioLoader.load('./audio/check-play.wav', function (buffer) {
+            playSound.setBuffer(buffer);
+            playSound.setLoop(false);
+            playSound.setVolume(0.5);
+            playSound.pause();
+        });
+
+        this.play_sound = playSound;
+
+        audioLoader.load('./audio/check-quit.wav', function (buffer) {
+            quitSound.setBuffer(buffer);
+            quitSound.setLoop(false);
+            quitSound.setVolume(0.5);
+            quitSound.pause();
+        });
+
+        this.quit_sound = quitSound;
+
+        this.last_move = 'none';
+
     }
 
     onMouseMove(event) {
@@ -91,9 +128,17 @@ class EndScene extends THREE.Scene {
 
         const intersects = raycaster.intersectObjects(scalableObjects);
 
+        var this_move = 'none';
+
         if (intersects.length > 0) {
             const hoveredObject = intersects[0].object;
             const scaleFactor = 1.2; // Adjust this value to control the scaling factor
+
+            if (hoveredObject === this.retry_text) {
+                this_move = 'retry';
+            } else if (hoveredObject === this.exit_text) {
+                this_move = 'exit';
+            }
 
             if (hoveredObject.scale.x !== scaleFactor) {
                 hoveredObject.scale.set(scaleFactor, scaleFactor, scaleFactor);
@@ -105,6 +150,11 @@ class EndScene extends THREE.Scene {
                 }
             }
         }
+        if (this_move != this.last_move && this_move != 'none') {
+            this.switch_sound.stop();
+            this.switch_sound.play();
+        }
+        this.last_move = this_move;
     }
 
     onMouseClick(event) {
@@ -127,8 +177,12 @@ class EndScene extends THREE.Scene {
             const clickedObject = intersects[0].object;
             if (clickedObject === this.retry_text) {
                 set_end_click("retry");
+                this.play_sound.stop();
+                this.play_sound.play();
             } else if (clickedObject === this.exit_text) {
                 set_end_click("exit");
+                this.quit_sound.stop();
+                this.quit_sound.play();
             }
         }
     }
