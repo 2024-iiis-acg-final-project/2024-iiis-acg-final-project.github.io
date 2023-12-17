@@ -33,25 +33,18 @@ class NormalShell extends Group {
         const loader = new GLTFLoader();
 
         loader.load(
-            './objects/models/ball1.glb',
+            './objects/models/ball.glb',
             function ( glb ) {
                 this.shell = glb.scene.clone();
-                this.shell.scale.set(0.05, 0.05, 0.05);
-                this.parent.addToUpdateList(this);
+                this.shell.scale.set(0.035, 0.035, 0.035);
                 this.parent.add(this.shell);
+                this.parent.addToUpdateList(this);
             }.bind(this),
             undefined,
             function ( err ) {
                 window.alert( 'An error happened.' );
             });
 
-
-        // this.shell = new Mesh(new SphereGeometry(0.1, 32, 32), new MeshStandardMaterial({ color: 0x00ff00 }));
-
-        // this.parent.addToUpdateList(this);
-        // this.parent.add(this.shell);
-        
-        // this.parent.addToUpdateList(this);
         this.remove_flag = false;
     }
 

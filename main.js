@@ -46,6 +46,23 @@ audioLoader.load( './audio/angry-bird.mp3', function( buffer ) {
 	back_music_finish_load = true;
 });
 
+var win_sound = new THREE.Audio(listener);
+var loss_sound = new THREE.Audio(listener);
+
+audioLoader.load( './audio/end-win.mp3', function( buffer ) {
+	win_sound.setBuffer( buffer );
+	win_sound.setLoop( false );
+	win_sound.setVolume( 0.5 );
+	win_sound.pause();
+});
+audioLoader.load( './audio/end-loss.mp3', function( buffer ) {
+	loss_sound.setBuffer( buffer );
+	loss_sound.setLoop( false );
+	loss_sound.setVolume( 0.5 );
+	loss_sound.pause();
+});
+
+
 function get_camera() {
 	return camera;
 }
@@ -109,6 +126,12 @@ const onAnimationFrameHandler = (timeStamp) => {
 			set_page_info('end');
 			set_pause_state(false);
 			set_success_flag(scene.success);
+			if (scene.success) {
+				win_sound.play();
+			}
+			else {
+				loss_sound.play();
+			}
 			scene = build_new_scene();
 		}
 	}

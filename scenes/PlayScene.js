@@ -20,11 +20,14 @@ class PlayScene extends Scene {
 
         this.update_list = []
         this.in_loading = true;
+        this.object_num = 0;
+        this.finish_load_all_object = false;
         fetch('./configs/level-' + String(level) + '.json')
             .then(resopnse => resopnse.json())
             .then(levelConfigs => {
                 load_ground(levelConfigs["gound_name"], this);
                 load_launch_pad(levelConfigs['launch_pad'], this);
+                this.object_num += 2;
 
                 this.pad_x = levelConfigs['launch_pad']['x'];
                 this.pad_y = levelConfigs['launch_pad']['y'];
@@ -34,27 +37,32 @@ class PlayScene extends Scene {
                 for (let enemy_cfg of levelConfigs['enemy']) {
                     load_enemy(this, enemy_cfg, enemy_id);
                     enemy_id += 1;
+                    this.object_num += 1;
                 }
                 var shell_id = 0;
                 for (let shell_type of levelConfigs['shell']) {
                     load_shell(this, shell_type, shell_id);
                     shell_id += 1;
+                    this.object_num += 1;
                 }
                 this.final_shell_id = shell_id;
                 var wall_id = 0;
                 for (let wall_cfg of levelConfigs['wall']) {
                     load_wall(this, wall_cfg['id'], wall_id, wall_cfg['cfg']);
                     wall_id += 1;
+                    this.object_num += 1;
                 }
                 var tool_id = 0;
                 for (let tool_cfg of levelConfigs['tool'] ) {
                     load_tool(this, tool_cfg, tool_id);
                     tool_id += 1;
+                    this.object_num += 1;
                 }
                 var deco_id = 0;
                 for (let deco_cfg of levelConfigs['decoration'] ) {
                     load_deco(this, deco_cfg['id'], deco_id, deco_cfg['cfg']);
                     deco_id += 1;
+                    this.object_num += 1;
                 }
                 this.in_loading = false;
             })
@@ -67,6 +75,7 @@ class PlayScene extends Scene {
         this.pause_state = false;
 
         this.ending_clock = -1;
+        this.recheck_clock = -1;
         this.success = false;
 
         var listener = new AudioListener();
@@ -115,6 +124,10 @@ class PlayScene extends Scene {
         this.pause_loop_sound = puaseSound;
 
         this.last_move = 'none';
+
+        const bgTexture = new TextureLoader().load('./objects/picture/sky.jpg');
+        // const bgMaterial = new MeshBasicMaterial({ map: bgTexture, side: THREE.DoubleSide });
+        this.background = bgTexture;
     }
 
     addToUpdateList(object) {
@@ -505,8 +518,14 @@ class PlayScene extends Scene {
             }
         }
         if (enemy_left == false) {
-            this.success = true;
-            this.ending_clock = 51;
+            if (this.recheck_clock == 0) {
+                this.success = true;
+                this.ending_clock = 51;
+            }
+            else {
+                this.recheck_clock = 100;
+            }
+            return;
         }
         
         var shell_left = false;
@@ -518,8 +537,14 @@ class PlayScene extends Scene {
             }
         }
         if (shell_left == false) {
-            this.success = false;
-            this.ending_clock = 51;
+            if (this.recheck_clock == 0) {
+                this.success = false;
+                this.ending_clock = 51;
+            }
+            else {
+                this.recheck_clock = 100;
+            }
+            return;
         }
     }
 
@@ -566,9 +591,21 @@ class PlayScene extends Scene {
         if (this.in_loading == true) {
             return;
         }
-        if (this.ending_clock == -1) {
+        if (this.finish_load_all_object == false) {
+            if (this.update_list.length == this.object_num) {
+                this.finish_load_all_object = true;
+            }
+            else {
+                return;
+            }
+        }
+        if (this.recheck_clock > 0) {
+            this.recheck_clock -= 1;
+        }
+        if (this.recheck_clock == -1 || this.recheck_clock == 0 && this.ending_clock == -1) {
             this.check_for_end();
         }
+        
         if (this.ending_clock > 0) {
             this.ending_clock -= 1;
             this.change_ending_light();
