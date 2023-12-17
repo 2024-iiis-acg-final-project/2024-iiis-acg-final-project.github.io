@@ -1,5 +1,6 @@
 import {Group, Mesh, SphereGeometry, MeshStandardMaterial} from 'three';
 import {SphereWithPlane, SphereWithSphere, damage} from '../../pyhsis'
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 
 class BombShell extends Group {
     constructor(parent, id) {
@@ -29,10 +30,25 @@ class BombShell extends Group {
 
         this.shell_state = "wait"; // state should in ["wait", "attacking", "used"]
 
-        this.shell = new Mesh(new SphereGeometry(0.1, 32, 32), new MeshStandardMaterial({ color: 0xff0000 }));
+        const loader = new GLTFLoader();
 
-        this.parent.addToUpdateList(this);
-        this.parent.add(this.shell);
+        loader.load(
+            './objects/models/grenade1.glb',
+            function ( glb ) {
+                this.shell = glb.scene.clone();
+                this.shell.scale.set(0.001, 0.001, 0.001);
+                this.parent.add(this.shell);
+                this.parent.addToUpdateList(this);
+            }.bind(this),
+            undefined,
+            function ( err ) {
+                window.alert( 'An error happened.' );
+            });
+
+        // this.shell = new Mesh(new SphereGeometry(0.1, 32, 32), new MeshStandardMaterial({ color: 0xff0000 }));
+
+        // this.parent.addToUpdateList(this);
+        // this.parent.add(this.shell);
         this.remove_flag = false;
         this.bomb_flag = false;
     }

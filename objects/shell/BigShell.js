@@ -1,5 +1,6 @@
 import {Group, Mesh, SphereGeometry, MeshStandardMaterial} from 'three';
 import {SphereWithPlane, SphereWithSphere, damage} from '../../pyhsis'
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import SubBigShell from './SubBigShell';
 
 class BigShell extends Group {
@@ -33,10 +34,25 @@ class BigShell extends Group {
 
         this.shell_state = "wait"; // state should in ["wait", "attacking", "used"]
 
-        this.shell = new Mesh(new SphereGeometry(0.15, 32, 32), new MeshStandardMaterial({ color: 0x00ff00 }));
+        const loader = new GLTFLoader();
 
-        this.parent.addToUpdateList(this);
-        this.parent.add(this.shell);
+        loader.load(
+            './objects/models/pokemonball.glb',
+            function ( glb ) {
+                this.shell = glb.scene.clone();
+                this.shell.scale.set(0.0036, 0.0036, 0.0036);
+                this.parent.add(this.shell);
+                this.parent.addToUpdateList(this);
+            }.bind(this),
+            undefined,
+            function ( err ) {
+                window.alert( 'An error happened.' );
+            });
+
+        // this.shell = new Mesh(new SphereGeometry(0.15, 32, 32), new MeshStandardMaterial({ color: 0x00ff00 }));
+
+        // this.parent.addToUpdateList(this);
+        // this.parent.add(this.shell);
         this.remove_flag = false;
     }
 

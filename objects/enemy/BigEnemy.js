@@ -1,4 +1,4 @@
-import {Group, MeshStandardMaterial, SphereGeometry, Mesh} from 'three';
+import {Group, MeshStandardMaterial, SphereGeometry, Mesh, TextureLoader} from 'three';
 import {SphereWithPlane, SphereWithSphere, damage} from '../../pyhsis'
 
 class BigEnemy extends Group{
@@ -9,8 +9,18 @@ class BigEnemy extends Group{
         this.obj_type = 'enemy';
         this.geo = 'sphere';
 
-        this.enemy = new Mesh(new SphereGeometry(0.5, 32, 32), new MeshStandardMaterial({ color: 0x0000ff }));
+        const normal_texture = new TextureLoader().load('./objects/picture/king.png');
+        this.normal_material = new MeshStandardMaterial({map: normal_texture});
+        this.enemy = new Mesh(new SphereGeometry(0.5, 32, 32), this.normal_material);
+
+        const shock_texture = new TextureLoader().load('./objects/picture/shock.png');
+        this.shock_material = new MeshStandardMaterial({map: shock_texture});
+
+        const hurt_texture = new TextureLoader().load('./objects/picture/hurt.png');
+        this.hurt_material = new MeshStandardMaterial({map: hurt_texture});
+
         this.enemy.position.set(x, y, z);
+        this.enemy.rotation.set(0, -Math.PI / 2, 0);
 
         this.blood = 500;
         this.enemy_id = id;
@@ -45,7 +55,17 @@ class BigEnemy extends Group{
         //     this.parent.remove(this.enemy);
         // }
 
-        this.enemy.material = new MeshStandardMaterial({color: 0x0000ff + Math.floor((500 - this.blood) / 500 * 0xff) * (0x10000)});
+        // this.enemy.material = new MeshStandardMaterial({color: 0x0000ff + Math.floor((500 - this.blood) / 500 * 0xff) * (0x10000)});
+
+        if (this.blood >= 300) {
+            this.enemy.material = this.normal_material;
+        }
+        else if (this.blood >= 150) {
+            this.enemy.material = this.shock_material;
+        }
+        else {
+            this.enemy.material = this.hurt_material;
+        }
 
         if (this.blood > 0) {
             this.move_step();

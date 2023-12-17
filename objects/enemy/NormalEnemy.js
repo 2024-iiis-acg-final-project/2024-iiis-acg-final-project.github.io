@@ -9,12 +9,18 @@ class NormalEnemy extends Group{
         this.obj_type = 'enemy';
         this.geo = 'sphere';
         
-        const debug_texture = new TextureLoader().load('./objects/picture/wall.jpg');
-        const debug_material = new MeshStandardMaterial({map: debug_texture});
-        this.enemy = new Mesh(new SphereGeometry(0.3, 32, 32), debug_material);
+        const normal_texture = new TextureLoader().load('./objects/picture/normal.png');
+        this.normal_material = new MeshStandardMaterial({map: normal_texture});
+        this.enemy = new Mesh(new SphereGeometry(0.3, 32, 32), this.normal_material);
 
-        // this.enemy = new Mesh(new SphereGeometry(0.3, 32, 32), new MeshStandardMaterial({ color: 0x0000ff }));
+        const shock_texture = new TextureLoader().load('./objects/picture/shock.png');
+        this.shock_material = new MeshStandardMaterial({map: shock_texture});
+
+        const hurt_texture = new TextureLoader().load('./objects/picture/hurt.png');
+        this.hurt_material = new MeshStandardMaterial({map: hurt_texture});
+
         this.enemy.position.set(x, y, z);
+        this.enemy.rotation.set(0, -Math.PI / 2, 0);
 
         this.blood = 100;
         this.enemy_id = id;
@@ -47,6 +53,15 @@ class NormalEnemy extends Group{
             }
 
             // this.enemy.material = new MeshStandardMaterial({color: 0x0000ff + Math.floor((100 - this.blood) / 100 * 0xff) * (0x10000)});
+            if (this.blood >= 60) {
+                this.enemy.material = this.normal_material;
+            }
+            else if (this.blood >= 30) {
+                this.enemy.material = this.shock_material;
+            }
+            else {
+                this.enemy.material = this.hurt_material;
+            }
 
             if (this.blood > 0) {
                 this.move_step();

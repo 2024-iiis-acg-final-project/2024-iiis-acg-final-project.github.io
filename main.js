@@ -55,7 +55,7 @@ audioLoader.load( './audio/end-win.mp3', function( buffer ) {
 	win_sound.setVolume( 0.5 );
 	win_sound.pause();
 });
-audioLoader.load( './audio/end-loss.mp3', function( buffer ) {
+audioLoader.load( './audio/end-lose.mp3', function( buffer ) {
 	loss_sound.setBuffer( buffer );
 	loss_sound.setLoop( false );
 	loss_sound.setVolume( 0.5 );
@@ -126,7 +126,7 @@ const onAnimationFrameHandler = (timeStamp) => {
 			set_page_info('end');
 			set_pause_state(false);
 			set_success_flag(scene.success);
-			if (scene.success) {
+			if (scene.success == true) {
 				win_sound.play();
 			}
 			else {
