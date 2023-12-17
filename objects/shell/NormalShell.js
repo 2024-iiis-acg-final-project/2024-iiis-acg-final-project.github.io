@@ -33,7 +33,7 @@ class NormalShell extends Group {
         const loader = new GLTFLoader();
 
         loader.load(
-            './objects/models/ball.glb',
+            './objects/models/ball1.glb',
             function ( glb ) {
                 this.shell = glb.scene.clone();
                 this.shell.scale.set(0.05, 0.05, 0.05);
