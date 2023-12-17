@@ -1,10 +1,7 @@
 import * as THREE from 'three';
-import { FontLoader } from 'three/addons/loaders/FontLoader.js';
-import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
-import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 import { get_level, set_level } from '../utils';
-import { TextureLoader, PlaneGeometry, MeshBasicMaterial, Mesh } from 'three';
+import { TextureLoader, PlaneGeometry, MeshBasicMaterial, Mesh, AudioLoader, AudioListener, Audio } from 'three';
 
 class SelectScene extends THREE.Scene {
     constructor() {
@@ -118,6 +115,18 @@ class SelectScene extends THREE.Scene {
         this.backgroundMesh = new Mesh(bgGeometry, bgMaterial);
         this.backgroundMesh.position.set(0, 0, -250); // Adjust the Z position to be behind other objects
         this.add(this.backgroundMesh);
+
+        var listener = new AudioListener();
+        var sound = new Audio( listener );
+        var audioLoader = new AudioLoader();
+        audioLoader.load( './audio/switch.wav', function( buffer ) {
+            sound.setBuffer( buffer );
+            sound.setLoop( false );
+            sound.setVolume( 0.5 );
+            sound.pause();
+        });
+
+        this.switch_sound = sound;
         
     }
 
@@ -148,15 +157,23 @@ class SelectScene extends THREE.Scene {
 
         if (direction == 1 && this.state.track % 3 != 2) {
             this.state.track ++;
+            this.switch_sound.stop();
+            this.switch_sound.play();
         }
         if (direction == -1 && this.state.track % 3 != 0) {
             this.state.track --;
+            this.switch_sound.stop();
+            this.switch_sound.play();
         }
         if (direction == 3 && this.state.track <= 5) {
             this.state.track += 3;
+            this.switch_sound.stop();
+            this.switch_sound.play();
         }
         if (direction == -3 && this.state.track >= 3) {
             this.state.track -= 3;
+            this.switch_sound.stop();
+            this.switch_sound.play();
         }
 
         const pos = this.get_position();

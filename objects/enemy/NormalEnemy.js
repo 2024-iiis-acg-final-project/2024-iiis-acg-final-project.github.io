@@ -1,4 +1,4 @@
-import {Group, MeshStandardMaterial, SphereGeometry, Mesh} from 'three';
+import {Group, MeshStandardMaterial, SphereGeometry, Mesh, TextureLoader} from 'three';
 import {SphereWithPlane, SphereWithSphere, damage} from '../../pyhsis'
 
 class NormalEnemy extends Group{
@@ -8,8 +8,12 @@ class NormalEnemy extends Group{
         this.name = 'normal_enemy';
         this.obj_type = 'enemy';
         this.geo = 'sphere';
+        
+        const debug_texture = new TextureLoader().load('./objects/picture/wall.jpg');
+        const debug_material = new MeshStandardMaterial({map: debug_texture});
+        this.enemy = new Mesh(new SphereGeometry(0.3, 32, 32), debug_material);
 
-        this.enemy = new Mesh(new SphereGeometry(0.3, 32, 32), new MeshStandardMaterial({ color: 0x0000ff }));
+        // this.enemy = new Mesh(new SphereGeometry(0.3, 32, 32), new MeshStandardMaterial({ color: 0x0000ff }));
         this.enemy.position.set(x, y, z);
 
         this.blood = 100;
@@ -36,22 +40,28 @@ class NormalEnemy extends Group{
     }
 
     update() {
-        if(this.remove_flag == false) {
-            this.remove_flag = true;
-            this.parent.remove(this.enemy);
-        }
+        try {
+            if (this.blood > 0 && this.remove_flag == true) {
+                this.remove_flag = false;
+                this.parent.add(this.enemy);
+            }
 
-        this.enemy.material = new MeshStandardMaterial({color: 0x0000ff + Math.floor((100 - this.blood) / 100 * 0xff) * (0x10000)});
+            // this.enemy.material = new MeshStandardMaterial({color: 0x0000ff + Math.floor((100 - this.blood) / 100 * 0xff) * (0x10000)});
 
-        if (this.blood > 0) {
-            this.move_step();
-            this.apply_g();
-            this.decay_velocity();
-            this.remove_flag = false;
-            this.parent.add(this.enemy);
-        }
-        else {
-            this.no_collision = true;
+            if (this.blood > 0) {
+                this.move_step();
+                this.apply_g();
+                this.decay_velocity();
+            }
+            else {
+                if (this.remove_flag == false) {
+                    this.remove_flag = true;
+                    this.parent.remove(this.enemy);
+                }
+                this.no_collision = true;
+            }
+        } catch (error) {
+            window.alert("Error:", error);
         }
     }
 
@@ -94,11 +104,11 @@ class NormalEnemy extends Group{
                         continue;
                     }
                 }
-                if (object.no_collision == true|| object.geo == 'cube') {
+                if (object.no_collision == true || object.geo == 'cube') {
                     continue;
                 }
                 let this_t = object.cal_min_t(this.enemy.position, this.velocity, this.radius);
-                if (this_t < 0 || this_t >= remain_step) {
+                if (this_t < -1e-2 || this_t >= remain_step) {
                     continue;
                 }
                 if (this_t < min_t) {
@@ -267,6 +277,18 @@ class NormalEnemy extends Group{
     }
 
     apply_g() {
+        for (let object of this.parent.update_list) {
+            if (object.name == 'plane') {
+                // A trick to avoid small jump
+                if (object.is_intersect(this.get_position(), this.radius)){
+                    return;
+                }
+                if (object.is_intersect(this.get_position(), this.radius + 0.01)){
+                    this.velocity.y -= 0.0001;
+                    return;
+                }
+            }
+        }
         this.velocity.y -= 0.001;
     }
 
@@ -327,10 +349,10 @@ class NormalEnemy extends Group{
         if (x1 > x2) {
             var t = x1; x1 = x2; x2 = t;
         }
-        if (x2 < 1e-4) {
+        if (x2 < 1e-2) {
             return 2;
         }
-        if (x1 < -1e-4) {
+        if (x1 < -1e-2) {
             return x2;
         }
         return x1;

@@ -1,6 +1,7 @@
 import {AmbientLight, DirectionalLight, PointLight, Scene, 
         MeshStandardMaterial, TextureLoader, Mesh, Group, 
-        MeshBasicMaterial, PlaneGeometry, Raycaster, Vector3} from 'three';
+        MeshBasicMaterial, PlaneGeometry, Raycaster, Vector3,
+        AudioLoader, AudioListener, Audio} from 'three';
 import { FontLoader } from 'three/addons/loaders/FontLoader.js';
 import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
 import { load_ground } from '../objects/grounds';
@@ -67,6 +68,53 @@ class PlayScene extends Scene {
 
         this.ending_clock = -1;
         this.success = false;
+
+        var listener = new AudioListener();
+
+        var switchSound = new Audio(listener);
+        var playSound = new Audio(listener);
+        var quitSound = new Audio(listener);
+        var puaseSound = new Audio(listener);
+
+        var audioLoader = new AudioLoader();
+
+        audioLoader.load('./audio/switch.wav', function (buffer) {
+            switchSound.setBuffer(buffer);
+            switchSound.setLoop(false);
+            switchSound.setVolume(0.5);
+            switchSound.pause();
+        });
+
+        this.switch_sound = switchSound;
+
+        audioLoader.load('./audio/check-play.wav', function (buffer) {
+            playSound.setBuffer(buffer);
+            playSound.setLoop(false);
+            playSound.setVolume(0.5);
+            playSound.pause();
+        });
+
+        this.play_sound = playSound;
+
+        audioLoader.load('./audio/check-quit.wav', function (buffer) {
+            quitSound.setBuffer(buffer);
+            quitSound.setLoop(false);
+            quitSound.setVolume(0.5);
+            quitSound.pause();
+        });
+
+        this.quit_sound = quitSound;
+
+        audioLoader.load('./audio/pause-loop.mp3', function (buffer) {
+            puaseSound.setBuffer(buffer);
+            puaseSound.setLoop(true);
+            puaseSound.setVolume(0.5);
+            puaseSound.pause();
+        });
+
+        this.pause_loop_sound = puaseSound;
+
+        this.last_move = 'none';
     }
 
     addToUpdateList(object) {
@@ -124,10 +172,20 @@ class PlayScene extends Scene {
         // Perform raycasting
         const intersects = raycaster.intersectObjects(scalableObjects);
 
+        var this_move = 'none';
+
         if (intersects.length > 0) {
             // Enlarge the button when the mouse is over it
             const hoveredObject = intersects[0].object;
             const scaleFactor = 1.2; // Adjust this value to control the scaling factor
+            
+            if (hoveredObject === this.continue_text) {
+                this_move = 'continue';
+            } else if (hoveredObject === this.retry_text) {
+                this_move = 'retry';
+            } else if (hoveredObject === this.exit_text) {
+                this_move = 'exit';
+            }
 
             if (hoveredObject.scale.x !== scaleFactor) {
                 hoveredObject.scale.set(scaleFactor, scaleFactor, scaleFactor);
@@ -140,6 +198,11 @@ class PlayScene extends Scene {
                 }
             }
         }
+        if (this_move != this.last_move && this_move != 'none') {
+            this.switch_sound.stop();
+            this.switch_sound.play();
+        }
+        this.last_move = this_move;
     }
 
     onMouseClick(event) {
@@ -168,21 +231,29 @@ class PlayScene extends Scene {
             if (clickedObject === this.continue_text) {
                 // Handle continue button click
                 set_pause_click("continue");
-                // window.alert('Continue button clicked');
+                this.play_sound.stop();
+                this.play_sound.play();
+                this.pause_loop_sound.stop();
             } else if (clickedObject === this.retry_text) {
                 // Handle retry button click
                 set_pause_click("retry");
-                // window.alert('Retry button clicked');
+                this.play_sound.stop();
+                this.play_sound.play();
+                this.pause_loop_sound.stop();
             } else if (clickedObject === this.exit_text) {
                 // Handle exit button click
                 set_pause_click("exit");
-                // window.alert('Exit button clicked');
+                this.quit_sound.stop();
+                this.quit_sound.play();
+                this.pause_loop_sound.stop();
             }
         }
     }
 
     update_in_pause_state() {
         if (this.pause_state == false) {
+            this.pause_loop_sound.stop();
+            this.pause_loop_sound.play();
             this.pause_state = true;
 
             for (let object of this.update_list) {
@@ -532,14 +603,29 @@ class PlayScene extends Scene {
         // if (this.debug_cnt == 1000) {
         //     this.debug_cnt = 0;
         //     var alive_cnt = 0;
+        //     var ret_string = "";
         //     for (let object of this.update_list) {
         //         if (object.obj_type == 'enemy') {
         //             if(object.blood > 0) {
         //                 alive_cnt += 1;
+        //                 ret_string += String(alive_cnt) + " : ";
+        //                 if (object.remove_flag == true) {
+        //                     ret_string += "true ";
+        //                 }
+        //                 else {
+        //                     ret_string += "false ";
+        //                 }
+        //                 ret_string += "x: " + String(object.get_position().x.toFixed(3)) + 
+        //                             " y: " + String(object.get_position().y.toFixed(3)) + 
+        //                             " z: " + String(object.get_position().z.toFixed(3)) + "\n";
+        //                 ret_string += "rx: " + String(object.enemy.rotation.x.toFixed(3)) + 
+        //                             " ry: " + String(object.enemy.rotation.y.toFixed(3)) + 
+        //                             " rz: " + String(object.enemy.rotation.z.toFixed(3)) + "\n";
+        //                 this.add(object.enemy);
         //             }
         //         }
         //     }
-        //     window.alert("Alive:" + String(alive_cnt));
+        //     window.alert(ret_string);
         // }
     }
 

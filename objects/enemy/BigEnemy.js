@@ -36,10 +36,14 @@ class BigEnemy extends Group{
     }
 
     update() {
-        if(this.remove_flag == false) {
-            this.remove_flag = true;
-            this.parent.remove(this.enemy);
+        if (this.blood > 0 && this.remove_flag == true) {
+            this.remove_flag = false;
+            this.parent.add(this.enemy);
         }
+        // if(this.remove_flag == false) {
+        //     this.remove_flag = true;
+        //     this.parent.remove(this.enemy);
+        // }
 
         this.enemy.material = new MeshStandardMaterial({color: 0x0000ff + Math.floor((500 - this.blood) / 500 * 0xff) * (0x10000)});
 
@@ -47,10 +51,14 @@ class BigEnemy extends Group{
             this.move_step();
             this.apply_g();
             this.decay_velocity();
-            this.remove_flag = false;
-            this.parent.add(this.enemy);
+            // this.remove_flag = false;
+            // this.parent.add(this.enemy);
         }
         else {
+            if (this.remove_flag == false) {
+                this.remove_flag = true;
+                this.parent.remove(this.enemy);
+            }
             this.no_collision = true;
         }
     }
@@ -98,7 +106,7 @@ class BigEnemy extends Group{
                     continue;
                 }
                 let this_t = object.cal_min_t(this.enemy.position, this.velocity, this.radius);
-                if (this_t < 0 || this_t >= remain_step) {
+                if (this_t < -1e-2 || this_t >= remain_step) {
                     continue;
                 }
                 if (this_t < min_t) {
@@ -267,6 +275,18 @@ class BigEnemy extends Group{
     }
 
     apply_g() {
+        for (let object of this.parent.update_list) {
+            if (object.name == 'plane') {
+                // A trick to avoid small jump
+                if (object.is_intersect(this.get_position(), this.radius)){
+                    return;
+                }
+                if (object.is_intersect(this.get_position(), this.radius + 0.01)){
+                    this.velocity.y -= 0.0001;
+                    return;
+                }
+            }
+        }
         this.velocity.y -= 0.001;
     }
 
@@ -327,10 +347,10 @@ class BigEnemy extends Group{
         if (x1 > x2) {
             var t = x1; x1 = x2; x2 = t;
         }
-        if (x2 < 1e-4) {
+        if (x2 < 1e-2) {
             return 2;
         }
-        if (x1 < -1e-4) {
+        if (x1 < -1e-2) {
             return x2;
         }
         return x1;

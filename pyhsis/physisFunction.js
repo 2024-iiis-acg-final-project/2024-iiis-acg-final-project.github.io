@@ -1,3 +1,39 @@
+function cross_product(vec1, vec2) {
+    return {
+        x: vec1.y * vec2.z - vec1.z * vec2.y,
+        y: vec1.z * vec2.x - vec1.x * vec2.z,
+        z: vec1.x * vec2.y - vec1.y * vec2.x
+    };
+}
+
+function dot_product(vec1, vec2) {
+    return vec1.x * vec2.x + vec1.y * vec2.y + vec1.z * vec2.z;
+}
+
+function vec_delete(vec1, vec2) {
+    return {
+        x: vec1.x - vec2.x,
+        y: vec1.y - vec2.y,
+        z: vec1.z - vec2.z
+    };
+}
+
+function vec_add(vec1, vec2) {
+    return {
+        x: vec1.x + vec2.x,
+        y: vec1.y + vec2.y,
+        z: vec1.z + vec2.z
+    };
+}
+
+function time_num(vec, num) {
+    return {
+        x: vec.x * num,
+        y: vec.y * num,
+        z: vec.z * num
+    };
+}
+
 function SphereWithSphere(position1, velocity1, angle_velocity1, radius1, mass1,
                           position2, velocity2, angle_velocity2, radius2, mass2) {
     var discount_coef = 0.9;
@@ -16,64 +52,20 @@ function SphereWithSphere(position1, velocity1, angle_velocity1, radius1, mass1,
         y: (velocity2.y - (velocity2.y - center_velocity.y) * 2) * discount_coef,
         z: (velocity2.z - (velocity2.z - center_velocity.z) * 2) * discount_coef
     };
-    var relative_velocity = {
-        x: velocity1.x - velocity2.x,
-        y: velocity1.y - velocity2.y,
-        z: velocity1.z - velocity2.z
-    };
-    var radius_vector = {
-        x: position2.x - position1.x,
-        y: position2.y - position1.y,
-        z: position2.z - position1.z
-    };
-    var radius_norm = Math.sqrt(radius_vector.x * radius_vector.x + radius_vector.y * radius_vector.y + radius_vector.z * radius_vector.z);
-    radius_vector.x /= radius_norm; radius_vector.y /= radius_norm; radius_vector.z /= radius_norm;
-    var rv_norm = Math.sqrt(relative_velocity.x * relative_velocity.x + 
-                            relative_velocity.y * relative_velocity.y +
-                            relative_velocity.z * relative_velocity.z);
-    var sin_theta = (radius_vector.x * relative_velocity.x +
-                     radius_vector.y * relative_velocity.y +
-                     radius_vector.z * relative_velocity.z) / rv_norm;
-    var r1 = {
-        x: radius_vector.x * radius1,
-        y: radius_vector.y * radius1,
-        z: radius_vector.z * radius1
-    };
-    var r2 = {
-        x: - radius_vector.x * radius2,
-        y: - radius_vector.y * radius2,
-        z: - radius_vector.z * radius2
-    };
-    var w1r1 = {
-        x: angle_velocity1.y * r1.z - angle_velocity1.z * r1.y,
-        y: angle_velocity1.z * r1.x - angle_velocity1.x * r1.z,
-        z: angle_velocity1.x * r1.y - angle_velocity1.y * r1.x
-    };
-    var w2r2 = {
-        x: angle_velocity2.y * r2.z - angle_velocity2.z * r2.y,
-        y: angle_velocity2.z * r2.x - angle_velocity2.x * r2.z,
-        z: angle_velocity2.x * r2.y - angle_velocity2.y * r2.x
-    };
-    var r1v = {
-        x: r1.y * relative_velocity.z - r1.z * relative_velocity.y,
-        y: r1.z * relative_velocity.x - r1.x * relative_velocity.z,
-        z: r1.x * relative_velocity.y - r1.y * relative_velocity.x
-    };
-    var r2v = {
-        x: r2.y * relative_velocity.z - r2.z * relative_velocity.y,
-        y: r2.z * relative_velocity.x - r2.x * relative_velocity.z,
-        z: r2.x * relative_velocity.y - r2.y * relative_velocity.x
-    };
-    var ret_angle_velocity1 = {
-        x: (angle_velocity1.x + (mass2 * (r1v.x * sin_theta / radius1 + w1r1.x + w2r2.x)) / ((mass1 + mass2) * radius1)) * discount_coef,
-        y: (angle_velocity1.y + (mass2 * (r1v.y * sin_theta / radius1 + w1r1.y + w2r2.y)) / ((mass1 + mass2) * radius1)) * discount_coef,
-        z: (angle_velocity1.z + (mass2 * (r1v.z * sin_theta / radius1 + w1r1.z + w2r2.z)) / ((mass1 + mass2) * radius1)) * discount_coef
-    }
-    var ret_angle_velocity2 = {
-        x: (angle_velocity2.x + (mass1 * (r2v.x * sin_theta / radius2 + w1r1.x + w2r2.x)) / ((mass1 + mass2) * radius2)) * discount_coef,
-        y: (angle_velocity2.y + (mass1 * (r2v.y * sin_theta / radius2 + w1r1.y + w2r2.y)) / ((mass1 + mass2) * radius2)) * discount_coef,
-        z: (angle_velocity2.z + (mass1 * (r2v.z * sin_theta / radius2 + w1r1.z + w2r2.z)) / ((mass1 + mass2) * radius2)) * discount_coef
-    }
+
+    var relative_velocity = vec_delete(velocity1, velocity2);
+    var radius_vector = vec_delete(position1, position2);
+    var radius_norm = Math.sqrt(dot_product(radius_vector, radius_vector));
+    radius_vector = time_num(radius_vector, 1.0 / radius_norm);
+    var r1 = time_num(radius_vector, radius1);
+    var r2 = time_num(radius_vector, -radius2);
+    var w1r1 = cross_product(angle_velocity1, r1);
+    var w2r2 = cross_product(angle_velocity2, r2);
+    var vr1 = time_num(r1, dot_product(relative_velocity, r1) / radius1 / radius1);
+    var vr2 = time_num(r2, dot_product(relative_velocity, r2) / radius2 / radius2);
+
+    var ret_angle_velocity1 = time_num(vec_add(angle_velocity1, time_num(cross_product(r1, vec_delete(relative_velocity, vec_add(vr2, vec_add(w1r1, w2r2)))), 5 / 7 * mass2 / (mass1 + mass2) / radius1 / radius1)), discount_coef);
+    var ret_angle_velocity2 = time_num(vec_add(angle_velocity2, time_num(cross_product(r2, vec_delete(relative_velocity, vec_add(vr1, vec_add(w1r1, w2r2)))), 5 / 7 * mass1 / (mass1 + mass2) / radius2 / radius2)), discount_coef);
 
     return {
         new_velocity1: new_this_velocity,
@@ -90,38 +82,23 @@ function SphereWithPlane(velocity, angle_velocity, radius, norm) {
         y: norm.y,
         z: norm.z
     }
-    var test_dir = velocity.x * normal.x + velocity.y * normal.y + velocity.z * normal.z;
+    var test_dir = dot_product(velocity, normal);
     if (test_dir > 0) {
-        normal.x = - normal.x; normal.y = - normal.y; normal.z = - normal.z;
+        normal = time_num(normal, -1);
     }
     test_dir = - test_dir;
-    var ret_velocity = {
-        x: (velocity.x + 2 * normal.x * test_dir) * discount_coef,
-        y: (velocity.y + 2 * normal.y * test_dir) * discount_coef,
-        z: (velocity.z + 2 * normal.z * test_dir) * discount_coef
-    };
-    var v_norm = Math.sqrt(velocity.x * velocity.x + velocity.y * velocity.y + velocity.z * velocity.z);
-    var sin_theta = test_dir / v_norm;
-    var r1 = {
-        x: - normal.x * radius,
-        y: - normal.y * radius,
-        z: - normal.z * radius
-    };
-    var w1r1 = {
-        x: angle_velocity.y * r1.z - angle_velocity.z * r1.y,
-        y: angle_velocity.z * r1.x - angle_velocity.x * r1.z,
-        z: angle_velocity.x * r1.y - angle_velocity.y * r1.x
-    };
-    var rv = {
-        x: r1.y * velocity.z - r1.z * velocity.y,
-        y: r1.z * velocity.x - r1.x * velocity.z,
-        z: r1.x * velocity.y - r1.y * velocity.x
-    };
-    var ret_angle_velocity = {
-        x: (angle_velocity.x + (sin_theta * rv.x / radius + w1r1.x) / radius) * discount_coef,
-        y: (angle_velocity.y + (sin_theta * rv.y / radius + w1r1.y) / radius) * discount_coef,
-        z: (angle_velocity.z + (sin_theta * rv.z / radius + w1r1.z) / radius) * discount_coef
-    };
+    var ret_velocity = time_num(vec_add(velocity, time_num(normal, 2 * test_dir)), discount_coef);
+
+    var r1 = time_num(normal, -radius);
+
+    var av_tmp = vec_add(cross_product(angle_velocity, r1), time_num(r1, dot_product(velocity, r1) / radius/ radius));
+    var add_av_tmp = vec_delete(velocity, av_tmp);
+    var add_angle_velocity_without_coef = cross_product(r1, add_av_tmp);
+    var add_angle_velocity = time_num(add_angle_velocity_without_coef, 5 / 7 / radius / radius);
+    var angle_velocity_without_discount = vec_add(angle_velocity, add_angle_velocity);
+
+    var ret_angle_velocity = time_num(angle_velocity_without_discount, discount_coef);
+    
     return {
         new_velocity: ret_velocity,
         new_angle_velocity: ret_angle_velocity

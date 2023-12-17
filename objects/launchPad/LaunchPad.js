@@ -191,6 +191,13 @@ class LaunchPad extends Group {
                 this.last_in_press = false;
                 this.attacking = true;
                 this.parent.set_first_shell_attack(this.force, this.launch_pad.rotation.x, this.launch_pad.rotation.y, 1);
+
+                this.force = 0.05;
+                this.parent.remove(this.force_render);
+                this.force_render = new Mesh(new PlaneGeometry(0.1, 0.05 * 0.6, 1, 1), 
+                                             new MeshBasicMaterial({color: this.linear_color(0.05)}));
+                this.force_render.position.set(this.pad_x - 0.5, this.pad_y + this.force * 0.6 / 2, this.pad_z);
+                this.parent.add(this.force_render);
                 // Doing attacking animation
             }
         }

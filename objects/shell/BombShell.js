@@ -86,7 +86,7 @@ class BombShell extends Group {
                     continue;
                 }
                 let this_t = object.cal_min_t(this.shell.position, this.velocity, this.radius);
-                if (this_t < 0 || this_t >= remain_step) {
+                if (this_t < -1e-2 || this_t >= remain_step) {
                     continue;
                 }
                 if (this_t < min_t) {
@@ -301,10 +301,10 @@ class BombShell extends Group {
         if (x1 > x2) {
             var t = x1; x1 = x2; x2 = t;
         }
-        if (x2 < 1e-4) {
+        if (x2 < 1e-2) {
             return 2;
         }
-        if (x1 < -1e-4) {
+        if (x1 < -1e-2) {
             return x2;
         }
         return x1;
@@ -316,14 +316,30 @@ class BombShell extends Group {
     }
 
     apply_g() {
+        for (let object of this.parent.update_list) {
+            if (object.name == 'plane') {
+                // A trick to avoid small jump
+                if (object.is_intersect(this.get_position(), this.radius)){
+                    return;
+                }
+                if (object.is_intersect(this.get_position(), this.radius + 0.01)){
+                    this.velocity.y -= 0.0001;
+                    return;
+                }
+            }
+        }
         this.velocity.y -= 0.001;
     }
 
     update(){
-        if(this.remove_flag == false) {
-            this.remove_flag = true;
-            this.parent.remove(this.shell);
+        if (this.shell_state != 'used' && this.remove_flag == true) {
+            this.remove_flag = false;
+            this.parent.add(this.shell);
         }
+        // if(this.remove_flag == false) {
+        //     this.remove_flag = true;
+        //     this.parent.remove(this.shell);
+        // }
 
         if (this.shell_state == 'attacking') {
             this.move_step();
@@ -331,12 +347,12 @@ class BombShell extends Group {
             this.decay_velocity();
         }
 
-        if (this.shell_state != 'used') {
-            this.remove_flag = false;
-            this.parent.add(this.shell);
-        }
-        else {
+        if (this.shell_state == 'used') {
             this.no_collision = true;
+            if (this.remove_flag == false) {
+                this.remove_flag = true;
+                this.parent.remove(this.shell);
+            }
             if (this.bomb_flag == false) {
                 this.bomb_flag = true;
                 for (let object of this.parent.update_list) {

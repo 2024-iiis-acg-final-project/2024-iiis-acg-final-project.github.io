@@ -8,22 +8,7 @@ function check_page_change(key) {
     if (page_info == 'select' && key == ' ') {
         return true;
     }
-    if (page_info == 'play' && get_pause_state() == false && key == 'e') {
-        return true;
-    }
-    // if (page_info == 'play' && get_pause_state() == true && key == 'r') {
-    //     return true;
-    // }
-    // if (page_info == 'play' && get_pause_state() == true && key == 'c') {
-    //     return true;
-    // }
-    // if (page_info == 'play' && get_pause_state() == true && key == 'e') {
-    //     return true;
-    // }
-    if (page_info == 'end' && key == 'r') {
-        return true;
-    }
-    if (page_info == 'end' && key == 'e') {
+    if (page_info == 'play' && get_pause_state() == false && key == 'Escape') {
         return true;
     }
     return false;
@@ -40,32 +25,9 @@ function change_global_info(key) {
         set_pause_state(false);
         return true;
     }
-    if (page_info == 'play' && get_pause_state() == false && key == 'e') {
+    if (page_info == 'play' && get_pause_state() == false && key == 'Escape') {
         set_pause_state(true);
         return false;
-    }
-    // if (page_info == 'play' && get_pause_state() == true && key == 'r') {
-    //     set_pause_state(false);
-    //     return true;
-    // }
-    // if (page_info == 'play' && get_pause_state() == true && key == 'c') {
-    //     set_pause_state(false);
-    //     return false;
-    // }
-    // if (page_info == 'play' && get_pause_state() == true && key == 'e') {
-    //     set_page_info('select');
-    //     set_pause_state(false);
-    //     return true;
-    // }
-    if (page_info == 'end' && key == 'r') {
-        set_pause_state(false);
-        set_page_info('play');
-        return true;
-    }
-    if (page_info == 'end' && key == 'e') {
-        set_pause_state(false);
-        set_page_info('select');
-        return true;
     }
     return false;
 }
