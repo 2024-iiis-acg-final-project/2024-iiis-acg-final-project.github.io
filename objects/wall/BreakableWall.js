@@ -13,7 +13,7 @@ class BreakableWall extends Group {
         this.cfg = cfg;
         const textureLoader = new TextureLoader();
         textureLoader.load(
-            './objects/picture/breakablewall1.jpg',
+            './objects/picture/wood.jpg',
             function (texture) {
                 texture.wrapS = RepeatWrapping;
                 texture.wrapT = RepeatWrapping;
@@ -51,7 +51,7 @@ class BreakableWall extends Group {
             }
         );
             textureLoader.load(
-                './objects/picture/breakablewall2.jpg',
+                './objects/picture/breakwood2.jpg',
                 function (texture) {
                     texture.wrapS = RepeatWrapping;
                     texture.wrapT = RepeatWrapping;
