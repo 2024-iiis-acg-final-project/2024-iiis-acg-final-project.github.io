@@ -611,7 +611,7 @@ class PlayScene extends Scene {
             this.change_ending_light();
             return;
         }
-        var wait_shell_x = this.pad_x + 0.2;
+        // var wait_shell_x = this.pad_x + 0.2;
         var attacking_flag = false;
         for (let object of this.update_list) {
             if (object.obj_type == 'shell') {
@@ -630,8 +630,9 @@ class PlayScene extends Scene {
         for (let object of this.update_list) {
             if (object.obj_type == 'shell') {
                 if (object.shell_state == 'wait') {
-                    wait_shell_x += 0.3;
-                    object.set_position(wait_shell_x, this.pad_y, this.pad_z);
+                    // wait_shell_x += 0.3;
+                    var this_shell_x = this.pad_x + 0.2 + 0.3 * this.get_wait_shell_num(object.shell_id);
+                    object.set_position(this_shell_x, this.pad_y, this.pad_z);
                 }
             }
             object.update()
@@ -666,6 +667,18 @@ class PlayScene extends Scene {
         // }
     }
 
+    get_wait_shell_num(max_id) {
+        var cnt = 0;
+        for (let object of this.update_list) {
+            if (object.obj_type == 'shell') {
+                if (object.shell_state == 'wait' && object.shell_id <= max_id) {
+                    cnt ++;
+                }
+            }
+        }
+        return cnt;
+    }
+
     set_first_shell_attack(force, x_angle, y_angle, length) {
         var unit_length = {
             x: 0,
@@ -681,7 +694,7 @@ class PlayScene extends Scene {
         
         for (let object of this.update_list) {
             if (object.obj_type == 'shell') {
-                if (object.shell_state == 'wait') {
+                if (object.shell_state == 'wait' && this.get_wait_shell_num(object.shell_id) == 1) {
                     object.shell_state = 'attacking';
                     object.velocity = {
                         x: unit_length.x * force * 0.1,
