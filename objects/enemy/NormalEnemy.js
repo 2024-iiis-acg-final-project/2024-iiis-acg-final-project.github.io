@@ -35,7 +35,7 @@ class NormalEnemy extends Group{
             y: 0,
             z: 0
         }
-        this.radius = 0.3
+        this.radius = 0.3;
         this.no_collision = false;
 
         this.mass = 10;

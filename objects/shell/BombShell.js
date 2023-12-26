@@ -386,7 +386,7 @@ class BombShell extends Group {
                         }
                         var ret_vector = object.get_direction(this.get_position());
                         var ret_norm = Math.sqrt(ret_vector.x * ret_vector.x + ret_vector.y * ret_vector.y + ret_vector.z * ret_vector.z);
-                        object.blood -= 10 / ret_norm / ret_norm;
+                        object.blood -= 80 / ret_norm / ret_norm;
                         continue;
                     }
                     if (object.obj_type == 'enemy' || (object.obj_type == 'shell' && object.shell_state == 'attacking')) {

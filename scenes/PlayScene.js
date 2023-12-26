@@ -76,6 +76,7 @@ class PlayScene extends Scene {
 
         this.ending_clock = -1;
         this.recheck_clock = -1;
+        this.enemy_move_clock = 0;
         this.success = false;
 
         var listener = new AudioListener();
@@ -508,15 +509,34 @@ class PlayScene extends Scene {
             }
         }
 
+        if (this.enemy_move_clock > 0) {
+            this.enemy_move_clock -= 1;
+        }
+
         var enemy_left = false;
         for (let object of this.update_list) {
             if (object.obj_type == 'enemy') {
                 if (object.blood > 0) {
                     enemy_left = true;
+
+                    // enemy move check
+                    var enemy_velocity = Math.sqrt(object.velocity.x * object.velocity.x + 
+                                                   object.velocity.y * object.velocity.y +
+                                                   object.velocity.z * object.velocity.z);
+                    if (enemy_velocity > 0.01) {
+                        this.enemy_move_clock = 100;
+                        return;
+                    }
+
                     break;
                 }
             }
         }
+
+        if (this.enemy_move_clock > 0) {
+            return;
+        }
+
         if (enemy_left == false) {
             if (this.recheck_clock == 0) {
                 this.success = true;

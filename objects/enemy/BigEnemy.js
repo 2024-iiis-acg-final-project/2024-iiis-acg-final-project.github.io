@@ -35,7 +35,7 @@ class BigEnemy extends Group{
             y: 0,
             z: 0
         }
-        this.radius = 0.5
+        this.radius = 0.5;
         this.no_collision = false;
 
         this.mass = 30;
