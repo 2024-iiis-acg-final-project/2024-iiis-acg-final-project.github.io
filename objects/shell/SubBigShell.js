@@ -26,7 +26,7 @@ class SubBigShell extends Group {
         this.radius = 0.075
         this.small_velocity_period = 0
 
-        this.mass = 5;
+        this.mass = 10;
 
         this.shell_state = "attacking"; // state should in ["wait", "attacking", "used"]
 
