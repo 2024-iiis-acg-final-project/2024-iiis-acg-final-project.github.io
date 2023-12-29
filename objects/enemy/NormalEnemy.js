@@ -1,4 +1,4 @@
-import {Group, MeshStandardMaterial, SphereGeometry, Mesh, TextureLoader} from 'three';
+import {Group, MeshStandardMaterial, SphereGeometry, Mesh, TextureLoader, AudioLoader, AudioListener, Audio, Quaternion, Euler} from 'three';
 import {SphereWithPlane, SphereWithSphere, damage} from '../../pyhsis'
 
 class NormalEnemy extends Group{
@@ -43,6 +43,29 @@ class NormalEnemy extends Group{
         parent.addToUpdateList(this);
         this.parent.add(this.enemy);
         this.remove_flag = false;
+
+        var listener = new AudioListener();
+        var hurtSound = new Audio(listener);
+        var scoreSound = new Audio(listener);
+        var audioLoader = new AudioLoader();
+
+        audioLoader.load('./audio/hurt.mp3', function (buffer) {
+            hurtSound.setBuffer(buffer);
+            hurtSound.setLoop(false);
+            hurtSound.setVolume(0.5);
+            hurtSound.pause();
+        });
+
+        audioLoader.load('./audio/score.mp3', function (buffer) {
+            scoreSound.setBuffer(buffer);
+            scoreSound.setLoop(false);
+            scoreSound.setVolume(0.5);
+            scoreSound.pause();
+        });
+
+        this.hurt_sound = hurtSound;
+        this.score_sound = scoreSound;
+        this.sound_stage = 3;
     }
 
     update() {
@@ -58,9 +81,19 @@ class NormalEnemy extends Group{
             }
             else if (this.blood >= 30) {
                 this.enemy.material = this.shock_material;
+                if (this.sound_stage == 3) {
+                    this.sound_stage = 2;
+                    this.hurt_sound.offset = 0.7;
+                    this.hurt_sound.play();
+                }
             }
             else {
                 this.enemy.material = this.hurt_material;
+                if (this.sound_stage == 2) {
+                    this.sound_stage = 1;
+                    this.hurt_sound.offset = 0.7;
+                    this.hurt_sound.play();
+                }
             }
 
             if (this.blood > 0) {
@@ -72,6 +105,9 @@ class NormalEnemy extends Group{
                 if (this.remove_flag == false) {
                     this.remove_flag = true;
                     this.parent.remove(this.enemy);
+                    this.hurt_sound.stop();
+                    this.score_sound.offset = 1;
+                    this.score_sound.play();
                 }
                 this.no_collision = true;
             }
@@ -92,9 +128,30 @@ class NormalEnemy extends Group{
         this.enemy.position.x += this.velocity.x * t;
         this.enemy.position.y += this.velocity.y * t;
         this.enemy.position.z += this.velocity.z * t;
-        this.enemy.rotation.x += this.angle_velocity.x * t;
-        this.enemy.rotation.y += this.angle_velocity.y * t;
-        this.enemy.rotation.z += this.angle_velocity.z * t;
+
+        // this.enemy.rotation.x += this.angle_velocity.x * t;
+        // this.enemy.rotation.y += this.angle_velocity.y * t;
+        // this.enemy.rotation.z += this.angle_velocity.z * t;
+
+        var deltaQuaternion = new Quaternion().setFromEuler(
+            new Euler(
+                this.angle_velocity.x * t,
+                this.angle_velocity.y * t,
+                this.angle_velocity.z * t,
+                'XYZ'
+            )
+        );
+        var currentQuaternion = new Quaternion().setFromEuler(
+            new Euler(
+                this.enemy.rotation.x,
+                this.enemy.rotation.y,
+                this.enemy.rotation.z,
+                'XYZ'
+            )
+        );
+        currentQuaternion.multiply(deltaQuaternion);
+        this.enemy.rotation.setFromQuaternion(currentQuaternion, 'XYZ');
+
         if (this.enemy.position.x < -15 || this.enemy.position.x > 15 ||
             this.enemy.position.y < -100 || this.enemy.position.y > 100 ||
             this.enemy.position.z < -15 || this.enemy.position.z > 2) {

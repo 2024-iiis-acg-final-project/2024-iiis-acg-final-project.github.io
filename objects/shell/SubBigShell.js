@@ -1,4 +1,4 @@
-import {Group, Mesh, SphereGeometry, MeshStandardMaterial} from 'three';
+import {Group, Mesh, SphereGeometry, MeshStandardMaterial, Quaternion, Euler} from 'three';
 import {SphereWithPlane, SphereWithSphere, damage} from '../../pyhsis'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 
@@ -68,9 +68,26 @@ class SubBigShell extends Group {
         this.shell.position.x += this.velocity.x * t;
         this.shell.position.y += this.velocity.y * t;
         this.shell.position.z += this.velocity.z * t;
-        this.shell.rotation.x += this.angle_velocity.x * t;
-        this.shell.rotation.y += this.angle_velocity.y * t;
-        this.shell.rotation.z += this.angle_velocity.z * t;
+        
+        var deltaQuaternion = new Quaternion().setFromEuler(
+            new Euler(
+                this.angle_velocity.x * t,
+                this.angle_velocity.y * t,
+                this.angle_velocity.z * t,
+                'XYZ'
+            )
+        );
+        var currentQuaternion = new Quaternion().setFromEuler(
+            new Euler(
+                this.shell.rotation.x,
+                this.shell.rotation.y,
+                this.shell.rotation.z,
+                'XYZ'
+            )
+        );
+        currentQuaternion.multiply(deltaQuaternion);
+        this.shell.rotation.setFromQuaternion(currentQuaternion, 'XYZ');
+
         if (this.shell.position.x < -15 || this.shell.position.x > 15 ||
             this.shell.position.y < -100 || this.shell.position.y > 100 ||
             this.shell.position.z < -15 || this.shell.position.z > 2) {

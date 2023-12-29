@@ -1,4 +1,6 @@
-import { BufferAttribute, BufferGeometry, Group, Mesh, PlaneGeometry, MeshStandardMaterial, MeshBasicMaterial } from "three";
+import { BufferAttribute, BufferGeometry, Group, 
+         Mesh, PlaneGeometry, MeshStandardMaterial, 
+         MeshBasicMaterial, AudioLoader, AudioListener, Audio } from "three";
 
 class LaunchPad extends Group {
     constructor(parent, x, y, z) {
@@ -97,6 +99,19 @@ class LaunchPad extends Group {
         this.no_collision = true;
 
         this.parent.add(this.launch_pad);
+
+        var listener = new AudioListener();
+        var shootSound = new Audio(listener);
+        var audioLoader = new AudioLoader();
+
+        audioLoader.load('./audio/shoot2.mp3', function (buffer) {
+            shootSound.setBuffer(buffer);
+            shootSound.setLoop(false);
+            shootSound.setVolume(0.5);
+            shootSound.pause();
+        });
+
+        this.shoot_sound = shootSound;
     }
 
     linear_color(rate) {
@@ -191,6 +206,10 @@ class LaunchPad extends Group {
                 this.last_in_press = false;
                 this.attacking = true;
                 this.parent.set_first_shell_attack(this.force, this.launch_pad.rotation.x, this.launch_pad.rotation.y, 1);
+
+                this.shoot_sound.stop();
+                this.shoot_sound.offset = 0.1;
+                this.shoot_sound.play();
 
                 this.force = 0.05;
                 this.parent.remove(this.force_render);

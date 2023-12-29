@@ -1,4 +1,4 @@
-import {Group, Mesh, SphereGeometry, MeshStandardMaterial} from 'three';
+import {Group, Mesh, SphereGeometry, MeshStandardMaterial, AudioLoader, AudioListener, Audio, Quaternion, Euler} from 'three';
 import {SphereWithPlane, SphereWithSphere, damage} from '../../pyhsis'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 
@@ -51,6 +51,19 @@ class BombShell extends Group {
         // this.parent.add(this.shell);
         this.remove_flag = false;
         this.bomb_flag = false;
+        
+        var listener = new AudioListener();
+        var bombSound = new Audio(listener);
+        var audioLoader = new AudioLoader();
+
+        audioLoader.load('./audio/bomb.mp3', function (buffer) {
+            bombSound.setBuffer(buffer);
+            bombSound.setLoop(false);
+            bombSound.setVolume(0.5);
+            bombSound.pause();
+        });
+
+        this.bomb_sound = bombSound;
     }
 
     set_position (x, y, z) {
@@ -67,9 +80,26 @@ class BombShell extends Group {
         this.shell.position.x += this.velocity.x * t;
         this.shell.position.y += this.velocity.y * t;
         this.shell.position.z += this.velocity.z * t;
-        this.shell.rotation.x += this.angle_velocity.x * t;
-        this.shell.rotation.y += this.angle_velocity.y * t;
-        this.shell.rotation.z += this.angle_velocity.z * t;
+        
+        var deltaQuaternion = new Quaternion().setFromEuler(
+            new Euler(
+                this.angle_velocity.x * t,
+                this.angle_velocity.y * t,
+                this.angle_velocity.z * t,
+                'XYZ'
+            )
+        );
+        var currentQuaternion = new Quaternion().setFromEuler(
+            new Euler(
+                this.shell.rotation.x,
+                this.shell.rotation.y,
+                this.shell.rotation.z,
+                'XYZ'
+            )
+        );
+        currentQuaternion.multiply(deltaQuaternion);
+        this.shell.rotation.setFromQuaternion(currentQuaternion, 'XYZ');
+
         if (this.shell.position.x < -15 || this.shell.position.x > 15 ||
             this.shell.position.y < -100 || this.shell.position.y > 100 ||
             this.shell.position.z < -15 || this.shell.position.z > 2) {
@@ -370,6 +400,7 @@ class BombShell extends Group {
                 this.parent.remove(this.shell);
             }
             if (this.bomb_flag == false) {
+                this.bomb_sound.play();
                 this.bomb_flag = true;
                 for (let object of this.parent.update_list) {
                     if (object.obj_type == 'shell') {
