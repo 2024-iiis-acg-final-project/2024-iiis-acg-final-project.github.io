@@ -26,6 +26,7 @@ var listener = new THREE.AudioListener();
 
 var sound = new THREE.Audio( listener );
 var back_music = new THREE.Audio( listener );
+var play_back_music = new THREE.Audio( listener );
 
 var audioLoader = new THREE.AudioLoader();
 audioLoader.load( './audio/key-press.wav', function( buffer ) {
@@ -44,6 +45,13 @@ audioLoader.load( './audio/angry-bird.mp3', function( buffer ) {
 	back_music.setVolume( 0.5 );
 	back_music.play();
 	back_music_finish_load = true;
+});
+
+audioLoader.load( './audio/play-bg.mp3', function( buffer ) {
+	play_back_music.setBuffer( buffer );
+	play_back_music.setLoop( true );
+	play_back_music.setVolume( 0.5 );
+	play_back_music.pause();
 });
 
 var win_sound = new THREE.Audio(listener);
@@ -87,12 +95,14 @@ const onAnimationFrameHandler = (timeStamp) => {
 		if (pause_click == 'continue') {
 			set_pause_state(false);
 			set_pause_click("none");
+			play_back_music.play();
 		}
 		else if (pause_click == 'retry') {
 			set_pause_state(false);
 			set_pause_click("none");
 			scene.reset_camera(camera);
 			scene = build_new_scene();
+			play_back_music.play();
 		}
 		else if (pause_click == 'exit') {
 			set_pause_state(false);
@@ -100,6 +110,7 @@ const onAnimationFrameHandler = (timeStamp) => {
 			set_pause_click("none");
 			scene.reset_camera(camera);
 			scene = build_new_scene();
+			play_back_music.stop();
 			back_music.play();
 		}
 	}
@@ -126,6 +137,7 @@ const onAnimationFrameHandler = (timeStamp) => {
 			set_page_info('end');
 			set_pause_state(false);
 			set_success_flag(scene.success);
+			play_back_music.stop();
 			if (scene.success == true) {
 				win_sound.play();
 			}
@@ -167,8 +179,12 @@ window.addEventListener('keydown', event => {
 			}
 			else if(before_page_info == 'select' && get_page_info() == 'play') {
 				back_music.stop();
+				play_back_music.play();
 			}
 			scene = build_new_scene();
+		}
+		if ( get_page_info() == 'play' && get_pause_state() ) {
+			play_back_music.stop();
 		}
 		WriteInfoLock.release();
 	}
