@@ -1,4 +1,5 @@
 import {Group, MeshStandardMaterial, SphereGeometry, Mesh, TextureLoader, AudioLoader, AudioListener, Audio, Quaternion, Euler} from 'three';
+import * as THREE from 'three';
 import {SphereWithPlane, SphereWithSphere, damage} from '../../pyhsis'
 
 class BigEnemy extends Group{
@@ -134,12 +135,18 @@ class BigEnemy extends Group{
         // this.enemy.rotation.y += this.angle_velocity.y * t;
         // this.enemy.rotation.z += this.angle_velocity.z * t;
 
-        var deltaQuaternion = new Quaternion().setFromEuler(
-            new Euler(
-                this.angle_velocity.x * t,
-                this.angle_velocity.y * t,
-                this.angle_velocity.z * t,
-                'XYZ'
+        var deltaQuaternion = new THREE.Quaternion().setFromAxisAngle(
+            new THREE.Vector3(1, 0, 0),  // X轴
+            this.angle_velocity.x * t
+        ).multiply(
+            new THREE.Quaternion().setFromAxisAngle(
+                new THREE.Vector3(0, 1, 0),  // Y轴
+                this.angle_velocity.y * t
+            )
+        ).multiply(
+            new THREE.Quaternion().setFromAxisAngle(
+                new THREE.Vector3(0, 0, 1),  // Z轴
+                this.angle_velocity.z * t
             )
         );
         var currentQuaternion = new Quaternion().setFromEuler(
