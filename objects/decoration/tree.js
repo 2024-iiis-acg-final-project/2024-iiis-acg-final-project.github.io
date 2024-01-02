@@ -16,7 +16,7 @@ class Tree extends Group{
         this.tree = null;
         const loader = new GLTFLoader();
         loader.load( 
-            './objects/models/treePine.glb', 
+            '/objects/models/treePine.glb', 
             function ( glb ) {
                 glb.scene.position.set(cfg['x'], cfg['y'], cfg['z'])
                 this.tree = glb.scene.clone();

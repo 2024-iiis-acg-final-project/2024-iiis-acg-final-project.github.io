@@ -1,4 +1,6 @@
 {
+  "name": "shell-shock",
+  "version": "1.0.0",
   "dependencies": {
     "three": "^0.158.0",
     "three-obj-loader": "^1.1.3"

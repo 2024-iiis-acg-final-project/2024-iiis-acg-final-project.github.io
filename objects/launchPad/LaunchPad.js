@@ -104,7 +104,7 @@ class LaunchPad extends Group {
         var shootSound = new Audio(listener);
         var audioLoader = new AudioLoader();
 
-        audioLoader.load('./audio/shoot2.mp3', function (buffer) {
+        audioLoader.load('/audio/shoot2.mp3', function (buffer) {
             shootSound.setBuffer(buffer);
             shootSound.setLoop(false);
             shootSound.setVolume(0.5);

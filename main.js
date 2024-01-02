@@ -29,7 +29,7 @@ var back_music = new THREE.Audio( listener );
 var play_back_music = new THREE.Audio( listener );
 
 var audioLoader = new THREE.AudioLoader();
-audioLoader.load( './audio/key-press.wav', function( buffer ) {
+audioLoader.load( '/audio/key-press.wav', function( buffer ) {
 	sound.setBuffer( buffer );
 	sound.setLoop( false );
 	sound.setVolume( 0.5 );
@@ -39,7 +39,7 @@ const press_sound = sound;
 var hasMusicStarted = false;
 var back_music_finish_load = false;
 
-audioLoader.load( './audio/angry-bird.mp3', function( buffer ) {
+audioLoader.load( '/audio/angry-bird.mp3', function( buffer ) {
 	back_music.setBuffer( buffer );
 	back_music.setLoop( true );
 	back_music.setVolume( 0.5 );
@@ -47,7 +47,7 @@ audioLoader.load( './audio/angry-bird.mp3', function( buffer ) {
 	back_music_finish_load = true;
 });
 
-audioLoader.load( './audio/play-bg.mp3', function( buffer ) {
+audioLoader.load( '/audio/play-bg.mp3', function( buffer ) {
 	play_back_music.setBuffer( buffer );
 	play_back_music.setLoop( true );
 	play_back_music.setVolume( 0.5 );
@@ -57,13 +57,13 @@ audioLoader.load( './audio/play-bg.mp3', function( buffer ) {
 var win_sound = new THREE.Audio(listener);
 var loss_sound = new THREE.Audio(listener);
 
-audioLoader.load( './audio/end-win.mp3', function( buffer ) {
+audioLoader.load( '/audio/end-win.mp3', function( buffer ) {
 	win_sound.setBuffer( buffer );
 	win_sound.setLoop( false );
 	win_sound.setVolume( 0.5 );
 	win_sound.pause();
 });
-audioLoader.load( './audio/end-lose.mp3', function( buffer ) {
+audioLoader.load( '/audio/end-lose.mp3', function( buffer ) {
 	loss_sound.setBuffer( buffer );
 	loss_sound.setLoop( false );
 	loss_sound.setVolume( 0.5 );

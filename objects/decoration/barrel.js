@@ -16,7 +16,7 @@ class Barrel extends Group{
         this.barrel = null;
         const loader = new GLTFLoader();
         loader.load( 
-            './objects/models/barrel.glb', 
+            '/objects/models/barrel.glb', 
             function ( glb ) {
                 glb.scene.position.set(cfg['x'], cfg['y'], cfg['z'])
                 this.barrel = glb.scene.clone();
