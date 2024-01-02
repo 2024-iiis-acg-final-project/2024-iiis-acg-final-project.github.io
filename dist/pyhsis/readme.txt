@@ -1,1 +1,0 @@
-The codes to determind the object and camera movement.
