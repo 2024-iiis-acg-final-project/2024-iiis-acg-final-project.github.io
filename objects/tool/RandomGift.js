@@ -14,7 +14,7 @@ class RandomGift extends Group {
         this.tool = null;
         const loader = new GLTFLoader();
         loader.load( 
-            './objects/models/key.glb', 
+            '/objects/models/key.glb', 
             function ( glb ) {
                 glb.scene.position.set(x, y, z)
                 this.tool = glb.scene.clone();

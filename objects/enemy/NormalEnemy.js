@@ -10,14 +10,14 @@ class NormalEnemy extends Group{
         this.obj_type = 'enemy';
         this.geo = 'sphere';
         
-        const normal_texture = new TextureLoader().load('./objects/picture/normal.png');
+        const normal_texture = new TextureLoader().load('/objects/picture/normal.png');
         this.normal_material = new MeshStandardMaterial({map: normal_texture});
         this.enemy = new Mesh(new SphereGeometry(0.3, 32, 32), this.normal_material);
 
-        const shock_texture = new TextureLoader().load('./objects/picture/shock.png');
+        const shock_texture = new TextureLoader().load('/objects/picture/shock.png');
         this.shock_material = new MeshStandardMaterial({map: shock_texture});
 
-        const hurt_texture = new TextureLoader().load('./objects/picture/hurt.png');
+        const hurt_texture = new TextureLoader().load('/objects/picture/hurt.png');
         this.hurt_material = new MeshStandardMaterial({map: hurt_texture});
 
         this.enemy.position.set(x, y, z);

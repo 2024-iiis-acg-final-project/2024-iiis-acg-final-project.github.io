@@ -34,7 +34,7 @@ class BombShell extends Group {
         const loader = new GLTFLoader();
 
         loader.load(
-            './objects/models/grenade1.glb',
+            '/objects/models/grenade1.glb',
             function ( glb ) {
                 this.shell = glb.scene.clone();
                 this.shell.scale.set(0.001, 0.001, 0.001);
@@ -57,7 +57,7 @@ class BombShell extends Group {
         var bombSound = new Audio(listener);
         var audioLoader = new AudioLoader();
 
-        audioLoader.load('./audio/bomb.mp3', function (buffer) {
+        audioLoader.load('/audio/bomb.mp3', function (buffer) {
             bombSound.setBuffer(buffer);
             bombSound.setLoop(false);
             bombSound.setVolume(0.5);

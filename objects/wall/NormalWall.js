@@ -14,7 +14,7 @@ class NormalWall extends Group {
         const textureLoader = new TextureLoader();
 
         textureLoader.load(
-            './objects/picture/bricknew1.jpg',
+            '/objects/picture/bricknew1.jpg',
             function (texture) {
                 texture.wrapS = RepeatWrapping;
                 texture.wrapT = RepeatWrapping;

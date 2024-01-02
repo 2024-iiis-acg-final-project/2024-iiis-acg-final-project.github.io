@@ -10,14 +10,14 @@ class BigEnemy extends Group{
         this.obj_type = 'enemy';
         this.geo = 'sphere';
 
-        const normal_texture = new TextureLoader().load('./objects/picture/king.png');
+        const normal_texture = new TextureLoader().load('/objects/picture/king.png');
         this.normal_material = new MeshStandardMaterial({map: normal_texture});
         this.enemy = new Mesh(new SphereGeometry(0.5, 32, 32), this.normal_material);
 
-        const shock_texture = new TextureLoader().load('./objects/picture/shock.png');
+        const shock_texture = new TextureLoader().load('/objects/picture/shock.png');
         this.shock_material = new MeshStandardMaterial({map: shock_texture});
 
-        const hurt_texture = new TextureLoader().load('./objects/picture/hurt.png');
+        const hurt_texture = new TextureLoader().load('/objects/picture/hurt.png');
         this.hurt_material = new MeshStandardMaterial({map: hurt_texture});
 
         this.enemy.position.set(x, y, z);
@@ -50,14 +50,14 @@ class BigEnemy extends Group{
         var scoreSound = new Audio(listener);
         var audioLoader = new AudioLoader();
 
-        audioLoader.load('./audio/hurt.mp3', function (buffer) {
+        audioLoader.load('/audio/hurt.mp3', function (buffer) {
             hurtSound.setBuffer(buffer);
             hurtSound.setLoop(false);
             hurtSound.setVolume(0.5);
             hurtSound.pause();
         });
 
-        audioLoader.load('./audio/score.mp3', function (buffer) {
+        audioLoader.load('/audio/score.mp3', function (buffer) {
             scoreSound.setBuffer(buffer);
             scoreSound.setLoop(false);
             scoreSound.setVolume(0.5);

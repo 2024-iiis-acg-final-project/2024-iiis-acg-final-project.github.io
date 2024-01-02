@@ -34,7 +34,7 @@ class SubBigShell extends Group {
         const loader = new GLTFLoader();
 
         loader.load(
-            './objects/models/pokemonball.glb',
+            '/objects/models/pokemonball.glb',
             function ( glb ) {
                 this.shell = glb.scene.clone();
                 this.shell.scale.set(0.0018, 0.0018, 0.0018);

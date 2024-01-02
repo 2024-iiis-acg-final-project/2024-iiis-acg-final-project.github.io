@@ -38,7 +38,7 @@ class BigShell extends Group {
         const loader = new GLTFLoader();
 
         loader.load(
-            './objects/models/pokemonball.glb',
+            '/objects/models/pokemonball.glb',
             function ( glb ) {
                 this.shell = glb.scene.clone();
                 this.shell.scale.set(0.0036, 0.0036, 0.0036);
@@ -60,7 +60,7 @@ class BigShell extends Group {
         var bombSound = new Audio(listener);
         var audioLoader = new AudioLoader();
 
-        audioLoader.load('./audio/bomb.mp3', function (buffer) {
+        audioLoader.load('/audio/bomb.mp3', function (buffer) {
             bombSound.setBuffer(buffer);
             bombSound.setLoop(false);
             bombSound.setVolume(0.5);

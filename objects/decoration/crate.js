@@ -16,7 +16,7 @@ class Crate extends Group{
         this.crate = null;
         const loader = new GLTFLoader();
         loader.load( 
-            './objects/models/crate.glb', 
+            '/objects/models/crate.glb', 
             function ( glb ) {
                 glb.scene.position.set(cfg['x'], cfg['y'], cfg['z'])
                 this.crate = glb.scene.clone();
